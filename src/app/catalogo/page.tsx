@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 
 import { ProductCard } from "@/components/product-card";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import type { CatalogoProducto } from "@/types/producto";
 
 export const metadata: Metadata = {
@@ -11,13 +11,62 @@ export const metadata: Metadata = {
     "Explora productos promocionales y soluciones de publicidad física para tu empresa.",
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function nullableString(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function nullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeCatalogo(data: unknown): CatalogoProducto[] {
+  const rawProducts = Array.isArray(data)
+    ? data
+    : isRecord(data) && Array.isArray(data.productos)
+      ? data.productos
+      : [];
+
+  return rawProducts.flatMap((item) => {
+    if (!isRecord(item)) return [];
+
+    const id = nullableString(item.id);
+    const nombre = nullableString(item.nombre);
+    const slug = nullableString(item.slug);
+
+    if (!id || !nombre || !slug) return [];
+
+    return [{
+      id,
+      nombre,
+      slug,
+      descripcion: nullableString(item.descripcion),
+      sku: nullableString(item.sku),
+      cantidad_minima: nullableNumber(item.cantidad_minima) ?? 0,
+      destacado: item.destacado === true,
+      categoria: nullableString(item.categoria) ?? "Sin categoría",
+      categoria_slug: nullableString(item.categoria_slug),
+      imagen_principal: nullableString(item.imagen_principal),
+      precio_desde: nullableNumber(item.precio_desde),
+    }];
+  });
+}
+
 export default async function CatalogoPage() {
   await connection();
 
-  const { data, error } = isSupabaseConfigured
-    ? await supabase.rpc("get_catalogo_productos")
-    : { data: null, error: new Error("Supabase no está configurado") };
-  const productos = (data ?? []) as CatalogoProducto[];
+  const { data, error } = await supabase.rpc("get_catalogo_productos");
+  const productos = normalizeCatalogo(data);
+
+  if (error) {
+    console.error("Error cargando catálogo:", error);
+  }
 
   return (
     <main className="min-h-screen bg-[#0b0d0e] text-white">

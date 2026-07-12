@@ -1,24 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-function isValidSupabaseUrl(value: string | undefined): value is string {
-  if (!value) return false;
-
-  try {
-    return ["http:", "https:"].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
+if (!supabaseUrl) {
+  throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
 }
 
-export const isSupabaseConfigured =
-  isValidSupabaseUrl(supabaseUrl) && Boolean(supabaseAnonKey);
+if (!supabaseKey) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+  );
+}
 
-// Los valores locales evitan que una configuración pendiente rompa el build.
-// La aplicación no consulta este cliente mientras isSupabaseConfigured sea false.
-export const supabase = createClient(
-  isValidSupabaseUrl(supabaseUrl) ? supabaseUrl : "http://127.0.0.1:54321",
-  supabaseAnonKey || "supabase-anon-key-not-configured",
-);
+export const supabase = createClient(supabaseUrl, supabaseKey);

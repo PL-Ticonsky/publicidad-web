@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Cargador inalámbrico personalizado</title>
+  <rect width="800" height="600" fill="#e9e8e4"/>
+  <ellipse cx="400" cy="326" rx="236" ry="170" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
+  <ellipse cx="400" cy="296" rx="188" ry="130" fill="none" stroke="#8f6f6c" stroke-width="5"/>
+  <path d="m415 194-72 119h61l-25 92 82-132h-64z" fill="#af101a"/>
+  <path d="M620 346c87 10 103 62 104 120" fill="none" stroke="#1b1c1a" stroke-width="12"/>
+  <circle cx="724" cy="482" r="13" fill="#af101a"/>
+</svg>

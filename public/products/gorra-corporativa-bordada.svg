@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Gorra corporativa bordada</title>
+  <rect width="800" height="600" fill="#efeeea"/>
+  <path d="M216 360c7-142 91-236 206-236 105 0 180 84 188 224-97-37-286-31-394 12Z" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
+  <path d="M411 126v219M216 360c164-45 350-27 466 45-137 50-336 31-466-45Z" fill="#d9d3cc" stroke="#1b1c1a" stroke-width="8"/>
+  <circle cx="411" cy="249" r="54" fill="#af101a"/>
+  <path d="m384 250 18 18 36-42" fill="none" stroke="#fff" stroke-width="10"/>
+</svg>

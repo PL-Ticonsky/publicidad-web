@@ -1,21 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bodoni_Moda, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bodoni = Bodoni_Moda({
+  variable: "--font-display",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const hanken = Hanken_Grotesk({
+  variable: "--font-body",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono-technical",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Publicidad y promocionales para empresas",
+  title: { default: "Tinta | Productos promocionales personalizados", template: "%s | Tinta" },
   description:
-    "Productos promocionales y soluciones de publicidad física para empresas en Colombia.",
+    "Cotiza productos promocionales personalizados por cantidad para empresas, eventos y campañas en Colombia.",
+  openGraph: { title: "Tinta | Publicidad física personalizada", description: "Productos promocionales para empresas, eventos y campañas en Colombia.", type: "website", locale: "es_CO" },
 };
 
 export default function RootLayout({
@@ -24,11 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className="h-full antialiased">
+      <body className={`${bodoni.variable} ${hanken.variable} ${mono.variable} min-h-full flex flex-col`}><SiteHeader />{children}<SiteFooter /></body>
     </html>
   );
 }

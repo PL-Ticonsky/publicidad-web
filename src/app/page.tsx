@@ -1,130 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ProductImage } from "@/components/product-image";
+import { ButtonLink } from "@/components/ui/button";
+import { ArrowRightIcon } from "@/components/ui/icons";
+import { getAllCategories, getCategoryById } from "@/data/categories";
+import { getAllActiveProducts, getFeaturedProducts } from "@/data/products";
+import { getTechniquesByIds } from "@/data/techniques";
+import { formatCOP } from "@/lib/format";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-whatsapp-url";
 
-export const metadata: Metadata = {
-  title: "Publicidad física personalizada para empresas",
-  description:
-    "Artículos promocionales personalizados y regalos corporativos para empresas en Colombia.",
-};
+export const metadata: Metadata = { title: "Publicidad que la gente se lleva", description: "Productos promocionales personalizados para empresas, eventos y marcas en Colombia." };
 
-const pasos = [
-  {
-    numero: "01",
-    titulo: "Elige productos",
-    descripcion:
-      "Explora el catálogo y encuentra los artículos adecuados para tu campaña o equipo.",
-  },
-  {
-    numero: "02",
-    titulo: "Personaliza tu cotización",
-    descripcion:
-      "Define cantidades, opciones de personalización y adicionales según tu necesidad.",
-  },
-  {
-    numero: "03",
-    titulo: "Finaliza por WhatsApp",
-    descripcion:
-      "Un asesor comercial revisa tu solicitud y te acompaña hasta cerrar el pedido.",
-  },
-];
+const faqs = [["¿Todos los productos tienen pedido mínimo?", "Cada producto tiene una cantidad mínima distinta. Puedes consultarla en la ficha y el cotizador no permite seleccionar una cantidad inferior."], ["¿Qué opciones de personalización hay?", "Las técnicas disponibles cambian según el material y aparecen directamente en la configuración de cada producto."], ["¿Qué archivo debo enviar?", "Comparte el archivo que tengas durante la conversación comercial. El equipo revisará si es adecuado antes de confirmar la producción."], ["¿Cómo recibo la cotización?", "Configura el producto en línea y continúa por WhatsApp con el resumen de cantidad, personalización, adicionales y precio estimado."]];
 
-const beneficios = [
-  "Artículos corporativos",
-  "Personalización por volumen",
-  "Atención comercial en Colombia",
-];
+function CropMarks() { return <span aria-hidden="true" className="pointer-events-none absolute inset-0 border border-[var(--line-soft)] before:absolute before:-left-2 before:-top-2 before:h-5 before:w-px before:bg-[var(--ink)] after:absolute after:-left-2 after:-top-2 after:h-px after:w-5 after:bg-[var(--ink)]" />; }
 
 export default function Home() {
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#0b0d0e] text-white">
-      <section className="relative border-b border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(245,158,11,0.16),_transparent_30%)]" />
-        <div className="relative mx-auto grid min-h-[680px] max-w-7xl items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_0.7fr] lg:px-10">
-          <div>
-            <div className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-amber-400">
-              <span className="h-px w-9 bg-amber-400" />
-              Promocionales para empresas
-            </div>
-            <h1 className="max-w-4xl text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-              Publicidad física personalizada para empresas
-            </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
-              Cotiza artículos promocionales como llaveros, mouse pads, mugs,
-              textiles y regalos corporativos. Arma tu cotización online y
-              finaliza la atención por WhatsApp.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/catalogo"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-amber-400 px-7 font-semibold text-zinc-950 transition hover:bg-amber-300"
-              >
-                Ver catálogo
-              </Link>
-              <Link
-                href="#como-funciona"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/15 px-7 font-semibold text-white transition hover:border-white/30 hover:bg-white/5"
-              >
-                Cómo funciona
-              </Link>
-            </div>
-          </div>
+  const products = getAllActiveProducts();
+  const featured = getFeaturedProducts().slice(0, 3);
+  const categories = getAllCategories().filter((category) => products.some((product) => product.categoryId === category.id));
+  const heroImages = products.slice(0, 2);
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const whatsappUrl = buildWhatsAppUrl(whatsapp);
 
-          <div className="hidden lg:block" aria-hidden="true">
-            <div className="relative mx-auto aspect-square max-w-md rounded-full border border-white/10">
-              <div className="absolute inset-12 rounded-full border border-amber-400/30" />
-              <div className="absolute inset-24 rounded-full bg-amber-400/10 shadow-[0_0_100px_rgba(245,158,11,0.18)]" />
-              <div className="absolute left-0 top-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-amber-400" />
-              <div className="absolute right-[14%] top-[8%] h-2 w-2 rounded-full bg-zinc-400" />
-            </div>
-          </div>
-        </div>
-      </section>
+  return <main>
+    <section className="overflow-hidden border-b border-[var(--line-soft)]"><div className="page-container relative grid min-h-[660px] grid-cols-1 gap-10 py-12 lg:grid-cols-12 lg:items-center lg:py-20"><span className="font-technical absolute left-0 top-5 text-[9px] uppercase tracking-[.12em] text-[var(--muted)]">Ref. portada / edición digital</span><div className="relative z-10 lg:col-span-6"><span className="font-technical inline-block bg-[var(--signal)] px-2 py-1 text-[10px] uppercase tracking-[.08em] text-white">Más de 20 años de experiencia</span><h1 className="mt-6 max-w-2xl text-[clamp(3rem,6vw,4.5rem)] leading-[.98]">Publicidad que<br /><em className="text-[var(--signal)]">la gente se lleva.</em></h1><p className="mt-7 max-w-md text-base leading-7 text-[var(--muted)]">Productos promocionales personalizados para empresas, eventos y marcas en Colombia. Convierte una idea en un objeto que se puede tocar, usar y recordar.</p><div className="mt-9 flex flex-wrap gap-3"><ButtonLink href="/catalogo">Explorar catálogo</ButtonLink>{whatsappUrl ? <a href={whatsappUrl} className="font-technical inline-flex min-h-11 items-center border border-[var(--ink)] px-5 text-xs font-semibold uppercase tracking-[.06em] hover:bg-[var(--ink)] hover:text-[var(--paper)]">Cotizar por WhatsApp</a> : null}</div></div><div className="relative min-h-[390px] lg:col-span-6 lg:min-h-[520px]">{heroImages[0] ? <Link href={`/producto/${heroImages[0].slug}`} className="absolute right-0 top-0 h-[72%] w-[72%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[0].images[0]?.src ?? null} alt={heroImages[0].name} priority sizes="(max-width: 1024px) 72vw, 36vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[0].name}</span></Link> : null}{heroImages[1] ? <Link href={`/producto/${heroImages[1].slug}`} className="absolute bottom-2 left-0 z-10 h-[48%] w-[52%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[1].images[0]?.src ?? null} alt={heroImages[1].name} sizes="(max-width: 1024px) 52vw, 26vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[1].name}</span></Link> : null}<span aria-hidden="true" className="absolute right-0 top-1/2 h-8 w-8 -translate-y-1/2 border border-[var(--signal)] before:absolute before:left-1/2 before:top-0 before:h-full before:w-px before:bg-[var(--signal)] after:absolute after:left-0 after:top-1/2 after:h-px after:w-full after:bg-[var(--signal)]" /></div></div></section>
 
-      <section
-        id="como-funciona"
-        className="scroll-mt-8 border-b border-white/10 py-20 sm:py-24"
-      >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-400">
-            Proceso simple
-          </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            Cómo funciona
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {pasos.map((paso) => (
-              <article
-                key={paso.numero}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-7"
-              >
-                <p className="text-sm font-bold text-amber-400">{paso.numero}</p>
-                <h3 className="mt-7 text-xl font-semibold">{paso.titulo}</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  {paso.descripcion}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+    <section id="categorias" className="scroll-mt-20 bg-[var(--stone-low)] py-16 lg:py-20"><div className="page-container"><div className="flex items-end justify-between border-t border-[var(--ink)] pt-3"><h2 className="text-[clamp(2rem,4vw,2.65rem)] uppercase">Nuestras categorías</h2><span className="font-technical hidden text-[9px] uppercase tracking-[.1em] text-[var(--muted)] sm:block">Catálogo local / {categories.length.toString().padStart(2,"0")} secciones</span></div>{categories.length ? <div className="mt-9 grid border-l border-t border-[var(--ink)] sm:grid-cols-2 lg:grid-cols-5">{categories.map((category,index) => <Link href={`/catalogo/${category.slug}`} key={category.id} className="group flex min-h-48 flex-col justify-between border-b border-r border-[var(--ink)] p-5 transition hover:bg-[var(--ink)] hover:text-[var(--paper)]"><span className="font-technical text-[9px] text-[var(--muted)] group-hover:text-[var(--paper)]">{String(index+1).padStart(2,"0")}/</span><h3 className="text-2xl uppercase leading-tight">{category.name}</h3><ArrowRightIcon className="h-5 w-5 self-end text-[var(--signal)]" /></Link>)}</div> : <p className="border-b border-[var(--ink)] py-12 text-[var(--muted)]">El catálogo todavía no tiene categorías disponibles.</p>}<div className="mt-6 text-right"><Link href="/catalogo" className="font-technical text-xs uppercase underline underline-offset-4">Ver todo el catálogo →</Link></div></div></section>
 
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-3">
-            {beneficios.map((beneficio) => (
-              <div
-                key={beneficio}
-                className="flex items-center gap-4 bg-zinc-950 px-6 py-7"
-              >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400/10 text-amber-400">
-                  ✓
-                </span>
-                <p className="font-medium text-zinc-200">{beneficio}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+    <section className="py-16 lg:py-20"><div className="page-container"><div className="flex items-center gap-4"><span className="h-px flex-1 bg-[var(--line-soft)]" /><h2 className="font-technical text-xs uppercase tracking-[.15em] text-[var(--signal)]">Productos destacados</h2><span className="h-px flex-1 bg-[var(--line-soft)]" /></div>{featured.length ? <div className="mt-10 grid border-l border-t border-[var(--ink)] md:grid-cols-3">{featured.map((product) => { const category = getCategoryById(product.categoryId); const price = product.priceTiers.length ? Math.min(...product.priceTiers.map((tier) => tier.unitPrice)) : null; const techniqueNames = getTechniquesByIds(product.availableTechniqueIds).map((technique) => technique.name); return <article key={product.id} className="flex min-h-[470px] flex-col border-b border-r border-[var(--ink)] bg-white"><Link href={`/producto/${product.slug}`} className="relative m-4 mb-0 block aspect-[4/3] overflow-hidden bg-[var(--stone)]"><ProductImage src={product.images[0]?.src ?? null} alt={product.name} sizes="(max-width:768px) 100vw, 33vw" /></Link><div className="flex flex-1 flex-col border-t border-[var(--line-soft)] p-5"><p className="font-technical text-[9px] uppercase tracking-[.08em] text-[var(--muted)]">{category?.name ?? "Producto"}</p><h3 className="mt-2 text-2xl uppercase leading-tight">{product.name}</h3><dl className="font-technical mt-4 grid grid-cols-2 gap-2 text-[9px] uppercase text-[var(--muted)]"><div><dt>Pedido mínimo</dt><dd className="mt-1 text-[var(--ink)]">{product.minimumQuantity.toLocaleString("es-CO")} unidades</dd></div><div><dt>Valor estimado desde</dt><dd className="mt-1 text-[var(--ink)]">{price !== null ? formatCOP(price) : "Por validar"}</dd></div></dl><p className="font-technical mt-4 text-[9px] uppercase text-[var(--muted)]">Personalización: {techniqueNames.length ? techniqueNames.join(" · ") : "Consultar opciones"}</p><div className="mt-auto flex items-center justify-between border-t border-[var(--line-soft)] pt-4"><Link href={`/producto/${product.slug}`} className="font-technical text-[10px] uppercase underline underline-offset-4">Ver producto</Link><Link href={`/cotizador?producto=${product.slug}`} className="font-technical text-[10px] uppercase text-[var(--signal)]">Cotizar →</Link></div></div></article>; })}</div> : <p className="mt-10 border-y border-[var(--ink)] py-12 text-center text-[var(--muted)]">No hay productos destacados disponibles.</p>}</div></section>
+
+    <section id="como-funciona" className="scroll-mt-20 bg-[var(--ink)] py-16 text-[var(--paper)] lg:py-20"><div className="page-container"><h2 className="max-w-2xl text-[clamp(2rem,4vw,2.8rem)] uppercase">De tu idea a una cotización lista para revisar.</h2><ol className="mt-12 grid border-t border-white/20 md:grid-cols-3">{[["01","Elige el producto","Explora el catálogo y abre la referencia que mejor se adapte a tu proyecto."],["02","Define cantidad y personalización","Compara tramos de precio y selecciona las opciones disponibles."],["03","Continúa por WhatsApp","Enviamos el resumen directamente a WhatsApp, sin guardar tus datos ni la cotización."]].map(([n,title,text]) => <li key={n} className="relative border-b border-white/20 py-7 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0"><span className="font-technical text-[10px] uppercase text-[var(--signal-bright)]">Paso {n}</span><h3 className="mt-5 text-2xl uppercase">{title}</h3><p className="mt-3 max-w-sm text-sm leading-6 text-white/65">{text}</p></li>)}</ol></div></section>
+
+    <section id="experiencia" className="scroll-mt-20 py-16 lg:py-20"><div className="page-container grid gap-12 lg:grid-cols-12 lg:items-center"><div className="lg:col-span-5"><p className="eyebrow">Experiencia física, acceso digital</p><h2 className="section-title mt-4 uppercase">Dos décadas haciendo publicidad fuera de la pantalla</h2><p className="mt-6 max-w-lg leading-7 text-[var(--muted)]">La experiencia acumulada durante más de 20 años ahora se conecta con una forma más sencilla de explorar productos, comparar cantidades y preparar una cotización en línea.</p><ButtonLink href="/catalogo" className="mt-7">Explorar productos</ButtonLink></div><div className="grid gap-3 sm:grid-cols-2 lg:col-span-7"><div className="relative aspect-[4/3] border border-[var(--line)] bg-[var(--stone)]"><CropMarks /><div className="font-technical flex h-full items-center justify-center p-8 text-center text-[10px] uppercase tracking-[.08em] text-[var(--muted)]">Espacio reservado para fotografía real de producción</div></div><div className="relative aspect-[4/3] border border-[var(--line)] bg-[var(--stone-high)]"><CropMarks /><div className="font-technical flex h-full items-center justify-center p-8 text-center text-[10px] uppercase tracking-[.08em] text-[var(--muted)]">Espacio reservado para materiales y pedidos terminados</div></div></div></div></section>
+
+    <section className="border-y border-[var(--line)] bg-[var(--stone-highest)] py-16 lg:py-20"><div className="page-container grid gap-12 lg:grid-cols-12 lg:items-center"><div className="lg:col-span-5"><h2 className="section-title uppercase">Tu marca, convertida en algo <span className="text-[var(--signal)]">real</span></h2><p className="mt-5 max-w-lg leading-7 text-[var(--muted)]">Elige el producto y revisa las técnicas de personalización disponibles. El cotizador transforma cantidad, impresión y adicionales en un resumen listo para conversar.</p><ButtonLink href="/catalogo" className="mt-7">Quiero personalizar un producto</ButtonLink></div><div className="grid grid-cols-2 gap-3 lg:col-span-7"><div className="relative aspect-square border border-[var(--line)] bg-[var(--paper)] p-5"><CropMarks /><span className="font-technical text-[9px] uppercase text-[var(--muted)]">01 / Idea o logo</span><div className="font-display flex h-full items-center justify-center text-5xl italic text-[var(--signal)]">Aa</div></div><div className="relative aspect-square border border-[var(--line)] bg-white p-5"><CropMarks /><span className="font-technical text-[9px] uppercase text-[var(--muted)]">02 / Producto configurado</span><div className="font-technical flex h-full items-center justify-center text-center text-[10px] uppercase text-[var(--muted)]">Selecciona un producto real del catálogo para iniciar</div></div></div></div></section>
+
+    <section id="preguntas" className="scroll-mt-20 py-16 lg:py-20"><div className="page-container grid gap-12 lg:grid-cols-2"><div><h2 className="section-title uppercase">Preguntas frecuentes</h2><div className="mt-8 border-t border-[var(--ink)]">{faqs.map(([q,a]) => <details key={q} className="border-b border-[var(--line-soft)] py-5"><summary className="cursor-pointer list-none pr-8 text-lg font-medium">{q}<span className="float-right font-technical text-[var(--signal)]">+</span></summary><p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)]">{a}</p></details>)}</div></div><div id="contacto" className="scroll-mt-20 border-l border-[var(--line-soft)] pl-0 lg:pl-12"><p className="eyebrow">Solicitud comercial</p><h2 className="section-title mt-4 uppercase">Cuéntanos qué quieres <span className="text-[var(--signal)]">producir.</span></h2><p className="mt-5 max-w-lg leading-7 text-[var(--muted)]">Te ayudamos a elegir el producto, la cantidad y la personalización adecuada para tu proyecto.</p><div className="mt-8 flex flex-wrap gap-3"><ButtonLink href="/catalogo">Solicitar cotización</ButtonLink>{whatsappUrl ? <a href={whatsappUrl} className="font-technical inline-flex min-h-11 items-center border border-[var(--ink)] px-5 text-xs uppercase hover:bg-[var(--ink)] hover:text-[var(--paper)]">Hablar por WhatsApp</a> : null}</div></div></div></section>
+  </main>;
 }

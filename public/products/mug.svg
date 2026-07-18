@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Mug cerámico blanco</title>
+  <rect width="800" height="600" fill="#e9e8e4"/>
+  <path d="M235 145h340v300c0 53-43 96-96 96H331c-53 0-96-43-96-96z" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
+  <path d="M575 215h45c72 0 85 164-4 183h-41" fill="none" stroke="#1b1c1a" stroke-width="28"/>
+  <rect x="235" y="145" width="340" height="38" fill="#af101a"/>
+  <circle cx="405" cy="330" r="76" fill="none" stroke="#af101a" stroke-width="6"/>
+  <text x="405" y="344" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="700" fill="#af101a">TINTA</text>
+</svg>

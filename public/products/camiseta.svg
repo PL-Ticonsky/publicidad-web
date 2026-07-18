@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Camiseta corporativa</title>
+  <rect width="800" height="600" fill="#efeeea"/>
+  <path d="M280 130 185 185l55 105 67-35v220h186V255l67 35 55-105-95-55-70 36H350z" fill="#faf9f5" stroke="#1b1c1a" stroke-width="7"/>
+  <path d="M350 130c5 42 95 42 100 0" fill="none" stroke="#1b1c1a" stroke-width="7"/>
+  <circle cx="400" cy="310" r="62" fill="#af101a"/>
+  <text x="400" y="324" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="white">T</text>
+  <path d="M84 88h80M124 48v80M636 512h80M676 472v80" stroke="#af101a" stroke-width="3"/>
+</svg>

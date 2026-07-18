@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Mug mágico personalizado</title>
+  <rect width="800" height="600" fill="#efeeea"/>
+  <path d="M224 150h352v294c0 58-47 105-105 105H329c-58 0-105-47-105-105z" fill="#1b1c1a"/>
+  <path d="M576 220h48c74 0 84 160-6 184h-42" fill="none" stroke="#1b1c1a" stroke-width="30"/>
+  <path d="M330 78c-26 34 29 45 0 83M400 62c-26 34 29 45 0 83M470 78c-26 34 29 45 0 83" fill="none" stroke="#8f6f6c" stroke-width="7"/>
+  <path d="m400 266 18 48 51 3-40 32 13 50-42-28-42 28 13-50-40-32 51-3z" fill="#af101a"/>
+</svg>

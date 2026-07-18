@@ -1,19 +1,32 @@
 @import "tailwindcss";
-
-:root {
-  --background: #0b0d0e;
-  --foreground: #f4f4f5;
-}
+@import "../styles/tokens.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-surface-page);
+  --color-foreground: var(--color-text-primary);
+  --font-sans: var(--font-body);
 }
 
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: var(--color-surface-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
 }
+h1, h2, h3, .font-display { font-family: var(--font-display), Georgia, serif; }
+.font-technical { font-family: var(--font-mono-technical), monospace; }
+h1 { font-weight: 700 !important; letter-spacing: -.02em !important; }
+h2 { font-weight: 600 !important; letter-spacing: -.015em; }
+h3 { font-weight: 600 !important; letter-spacing: -.01em; }
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--color-brand-accent); outline-offset: 3px; }
+.page-container { width: min(100% - 2rem, var(--container-page)); margin-inline: auto; }
+.eyebrow { color: var(--signal); font-family: var(--font-mono-technical), monospace; font-size: .7rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; }
+.section-title { color: var(--ink); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.12; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+#nombre, #empresa, #telefono, #email, #ciudad { border-width: 0 0 1px; border-radius: 0; background: transparent; padding-inline: .5rem; }
+@media (min-width: 640px) { .page-container { width: min(100% - 3rem, var(--container-page)); } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }

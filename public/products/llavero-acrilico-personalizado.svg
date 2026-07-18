@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Llavero acrílico personalizado</title>
+  <rect width="800" height="600" fill="#efeeea"/>
+  <circle cx="400" cy="128" r="76" fill="none" stroke="#1b1c1a" stroke-width="16"/>
+  <path d="M400 202v66" stroke="#1b1c1a" stroke-width="16"/>
+  <path d="m400 246 166 96-64 184H298l-64-184z" fill="#faf9f5" fill-opacity=".82" stroke="#1b1c1a" stroke-width="8"/>
+  <circle cx="400" cy="396" r="63" fill="#af101a"/>
+  <path d="M366 396h68" stroke="#fff" stroke-width="10"/>
+</svg>

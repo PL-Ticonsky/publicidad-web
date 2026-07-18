@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Soporte para celular corporativo</title>
+  <rect width="800" height="600" fill="#efeeea"/>
+  <rect x="282" y="62" width="236" height="390" rx="30" fill="#1b1c1a"/>
+  <rect x="300" y="88" width="200" height="320" rx="12" fill="#faf9f5"/>
+  <circle cx="400" cy="430" r="10" fill="#faf9f5"/>
+  <path d="m322 452-96 94h348l-96-94" fill="#d9d3cc" stroke="#1b1c1a" stroke-width="8"/>
+  <circle cx="400" cy="246" r="58" fill="#af101a"/>
+  <path d="M371 246h58" stroke="#fff" stroke-width="9"/>
+</svg>

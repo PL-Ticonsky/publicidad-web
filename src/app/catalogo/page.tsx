@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { connection } from "next/server";
-
 import { ProductCard } from "@/components/product-card";
-import { supabase } from "@/lib/supabase";
-import type { CatalogoProducto } from "@/types/producto";
+import { EmptyState } from "@/components/ui/feedback";
+import { getAllActiveProducts } from "@/data/products";
 
 export const metadata: Metadata = {
   title: "Catálogo de productos | Promocionales para empresas",
@@ -11,104 +9,30 @@ export const metadata: Metadata = {
     "Explora productos promocionales y soluciones de publicidad física para tu empresa.",
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function nullableString(value: unknown): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function nullableNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === "") return null;
-
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function normalizeCatalogo(data: unknown): CatalogoProducto[] {
-  const rawProducts = Array.isArray(data)
-    ? data
-    : isRecord(data) && Array.isArray(data.productos)
-      ? data.productos
-      : [];
-
-  return rawProducts.flatMap((item) => {
-    if (!isRecord(item)) return [];
-
-    const id = nullableString(item.id);
-    const nombre = nullableString(item.nombre);
-    const slug = nullableString(item.slug);
-
-    if (!id || !nombre || !slug) return [];
-
-    return [{
-      id,
-      nombre,
-      slug,
-      descripcion: nullableString(item.descripcion),
-      sku: nullableString(item.sku),
-      cantidad_minima: nullableNumber(item.cantidad_minima) ?? 0,
-      destacado: item.destacado === true,
-      categoria: nullableString(item.categoria) ?? "Sin categoría",
-      categoria_slug: nullableString(item.categoria_slug),
-      imagen_principal: nullableString(item.imagen_principal),
-      precio_desde: nullableNumber(item.precio_desde),
-    }];
-  });
-}
-
-export default async function CatalogoPage() {
-  await connection();
-
-  const { data, error } = await supabase.rpc("get_catalogo_productos");
-  const productos = normalizeCatalogo(data);
-
-  if (error) {
-    console.error("Error cargando catálogo:", error);
-  }
+export default function CatalogoPage() {
+  const products = getAllActiveProducts();
 
   return (
-    <main className="min-h-screen bg-[#0b0d0e] text-white">
-      <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.12),_transparent_32%)]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
-          <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-amber-400">
-            <span className="h-px w-9 bg-amber-400" />
-            Catálogo corporativo
-          </div>
-          <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Productos que hacen visible tu marca
+    <main className="min-h-screen">
+      <section className="border-b border-black/8 bg-white">
+        <div className="page-container py-14 sm:py-20">
+          <p className="eyebrow">Catálogo corporativo</p>
+          <h1 className="mt-4 max-w-3xl text-[clamp(2.5rem,5vw,3.8rem)] font-extrabold leading-[1.06] tracking-[-.045em] text-[var(--color-brand-primary)]">
+            Productos pensados para hacer visible tu marca
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-7 text-[var(--color-text-secondary)] sm:text-lg">
             Soluciones promocionales para campañas, eventos y equipos. Selecciona un producto y conoce sus opciones de personalización y precios por volumen.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-zinc-500">Portafolio disponible</p>
-            <p className="mt-1 text-lg font-semibold text-zinc-200">
-              {productos.length} {productos.length === 1 ? "producto" : "productos"}
-            </p>
-          </div>
-        </div>
-
-        {error ? (
-          <div className="rounded-2xl border border-red-400/20 bg-red-400/5 px-6 py-10 text-center">
-            <h2 className="text-lg font-semibold text-white">No pudimos cargar el catálogo</h2>
-            <p className="mt-2 text-sm text-zinc-400">Intenta nuevamente en unos minutos.</p>
-          </div>
-        ) : productos.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-14 text-center">
-            <h2 className="text-lg font-semibold">Estamos preparando el catálogo</h2>
-            <p className="mt-2 text-sm text-zinc-400">Pronto encontrarás aquí nuestros productos.</p>
-          </div>
+      <section className="page-container py-10 sm:py-14 lg:py-16">
+        {products.length === 0 ? (
+          <EmptyState title="Estamos preparando el catálogo" description="Pronto encontrarás aquí nuestros productos." />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {productos.map((producto) => (
-              <ProductCard key={producto.id} producto={producto} />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}

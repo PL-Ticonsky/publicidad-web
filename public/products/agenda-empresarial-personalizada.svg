@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Agenda empresarial personalizada</title>
+  <rect width="800" height="600" fill="#e9e8e4"/>
+  <rect x="220" y="70" width="360" height="470" rx="22" fill="#1b1c1a"/>
+  <rect x="246" y="96" width="308" height="418" rx="10" fill="#faf9f5"/>
+  <path d="M220 170h360" stroke="#af101a" stroke-width="12"/>
+  <rect x="324" y="234" width="152" height="142" fill="none" stroke="#af101a" stroke-width="7"/>
+  <path d="M353 276h94M353 312h94M353 348h62" stroke="#1b1c1a" stroke-width="7"/>
+  <path d="M500 70v470" stroke="#8f6f6c" stroke-width="6"/>
+</svg>

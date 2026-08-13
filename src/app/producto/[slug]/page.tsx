@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: PageProps<"/producto/[slug
           {category ? <Link href={`/catalogo/${category.slug}`} className="underline underline-offset-4">{category.name}</Link> : <span>Producto</span>}
         </nav>
 
-        <section className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,.75fr)] lg:items-start">
+        <section className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(360px,2fr)] lg:items-start lg:gap-12">
           <ProductGallery images={product.images} name={product.name} />
           <div className="border-t border-[var(--ink)] pt-6">
             <p className="eyebrow">{category?.name ?? "Producto"} {product.sku ? `/ Ref. ${product.sku}` : ""}</p>

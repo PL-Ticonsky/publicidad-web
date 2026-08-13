@@ -1,0 +1,317 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100vw;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--paper);
+  padding:
+    max(1.5rem, env(safe-area-inset-top))
+    max(1.5rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom))
+    max(1.5rem, env(safe-area-inset-left));
+  animation: promotion-fade-in 480ms ease-out both;
+}
+
+.close {
+  position: fixed;
+  top: max(1.25rem, env(safe-area-inset-top));
+  right: max(1.25rem, env(safe-area-inset-right));
+  z-index: 2;
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  font-size: 1.75rem;
+  line-height: 1;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.close:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.close:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.content {
+  width: min(100%, 90rem);
+  min-height: calc(100dvh - 3rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 1fr);
+  gap: clamp(3rem, 6vw, 7rem);
+  align-items: center;
+}
+
+.copy {
+  max-width: 52rem;
+  padding-block: clamp(3rem, 7vh, 6rem);
+}
+
+.label {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  background: var(--signal);
+  padding-inline: .7rem;
+  color: white;
+  font-family: var(--font-mono-technical), monospace;
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  animation: promotion-rise-in 460ms 60ms ease-out both;
+}
+
+.title {
+  margin-top: clamp(1.5rem, 3vh, 2.5rem);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(4.4rem, 6.6vw, 7.5rem);
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: .86;
+}
+
+.titleMain,
+.titleAccent {
+  display: block;
+}
+
+.titleMain {
+  color: var(--ink);
+  animation: promotion-rise-in 520ms 110ms ease-out both;
+}
+
+.titleAccent {
+  margin-top: .12em;
+  color: var(--signal);
+  font-style: italic;
+  font-weight: 600;
+  animation: promotion-rise-in 520ms 180ms ease-out both;
+}
+
+.support {
+  max-width: 36rem;
+  margin-top: clamp(1.5rem, 3vh, 2.25rem);
+  color: var(--muted);
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  line-height: 1.7;
+  animation: promotion-rise-in 480ms 240ms ease-out both;
+}
+
+.coupon {
+  width: min(100%, 34rem);
+  margin-top: clamp(1.25rem, 2.5vh, 2rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-block: 1px solid var(--line);
+  padding-block: .9rem;
+  animation: promotion-rise-in 480ms 290ms ease-out both;
+}
+
+.couponLabel,
+.couponCode {
+  font-family: var(--font-mono-technical), monospace;
+  text-transform: uppercase;
+}
+
+.couponLabel {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .1em;
+}
+
+.couponCode {
+  color: var(--ink);
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  letter-spacing: .18em;
+}
+
+.actions {
+  margin-top: clamp(1.5rem, 3vh, 2.25rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  animation: promotion-rise-in 480ms 340ms ease-out both;
+}
+
+.continue {
+  margin-top: 1rem;
+  min-height: 2.75rem;
+  color: var(--muted);
+  font-family: var(--font-mono-technical), monospace;
+  font-size: .65rem;
+  letter-spacing: .08em;
+  text-decoration: underline;
+  text-underline-offset: .3rem;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+  animation: promotion-rise-in 480ms 380ms ease-out both;
+}
+
+.continue:hover {
+  color: var(--signal);
+}
+
+.continue:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.visual {
+  width: 100%;
+  animation: promotion-image-in 600ms 160ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.imageFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--stone-high);
+}
+
+.image {
+  object-fit: contain;
+}
+
+.caption {
+  margin-top: .8rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-family: var(--font-mono-technical), monospace;
+  font-size: .58rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+@keyframes promotion-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes promotion-rise-in {
+  from { opacity: 0; transform: translateY(.85rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes promotion-image-in {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 900px) {
+  .overlay {
+    padding:
+      max(1rem, env(safe-area-inset-top))
+      max(1rem, env(safe-area-inset-right))
+      max(1rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
+  }
+
+  .close {
+    top: max(.75rem, env(safe-area-inset-top));
+    right: max(.75rem, env(safe-area-inset-right));
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .content {
+    min-height: calc(100dvh - 2rem);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    align-content: start;
+    padding-block: 3.25rem 1rem;
+  }
+
+  .copy {
+    max-width: none;
+    padding: 0;
+  }
+
+  .label {
+    min-height: 1.5rem;
+    padding-inline: .55rem;
+    font-size: .55rem;
+  }
+
+  .title {
+    margin-top: 1.15rem;
+    font-size: clamp(3.15rem, 14vw, 5rem);
+    line-height: .88;
+  }
+
+  .support {
+    margin-top: 1.15rem;
+    font-size: .95rem;
+    line-height: 1.55;
+  }
+
+  .coupon {
+    margin-top: 1rem;
+    padding-block: .65rem;
+  }
+
+  .couponCode {
+    font-size: 1.15rem;
+  }
+
+  .actions {
+    margin-top: 1.15rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .55rem;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+
+  .continue {
+    margin-top: .65rem;
+  }
+
+  .visual {
+    width: min(78vw, 19rem);
+    margin-inline: auto;
+  }
+
+  .caption {
+    margin-top: .55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .label,
+  .titleMain,
+  .titleAccent,
+  .support,
+  .coupon,
+  .actions,
+  .continue,
+  .visual {
+    animation: none;
+  }
+
+  .close,
+  .continue {
+    transition: none;
+  }
+}

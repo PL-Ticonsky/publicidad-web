@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
+import { PromotionSplash } from "@/components/promotion/promotion-splash";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { getAllCategories, getCategoryById } from "@/data/categories";
-import { getAllActiveProducts, getFeaturedProducts } from "@/data/products";
+import { getAllActiveProducts, getFeaturedProducts, getProductBySlug } from "@/data/products";
 import { getTechniquesByIds } from "@/data/techniques";
 import { formatCOP } from "@/lib/format";
 import { buildWhatsAppUrl } from "@/lib/whatsapp/build-whatsapp-url";
@@ -13,6 +14,8 @@ export const metadata: Metadata = { title: "Publicidad que la gente se lleva", d
 
 const faqs = [["¿Todos los productos tienen pedido mínimo?", "Cada producto tiene una cantidad mínima distinta. Puedes consultarla en la ficha y el cotizador no permite seleccionar una cantidad inferior."], ["¿Qué opciones de personalización hay?", "Las técnicas disponibles cambian según el material y aparecen directamente en la configuración de cada producto."], ["¿Qué archivo debo enviar?", "Comparte el archivo que tengas durante la conversación comercial. El equipo revisará si es adecuado antes de confirmar la producción."], ["¿Cómo recibo la cotización?", "Configura el producto en línea y continúa por WhatsApp con el resumen de cantidad, personalización, adicionales y precio estimado."]];
 
+const promotionProductSlug = "llavero-metalico-redondo";
+
 function CropMarks() { return <span aria-hidden="true" className="pointer-events-none absolute inset-0 border border-[var(--line-soft)] before:absolute before:-left-2 before:-top-2 before:h-5 before:w-px before:bg-[var(--ink)] after:absolute after:-left-2 after:-top-2 after:h-px after:w-5 after:bg-[var(--ink)]" />; }
 
 export default function Home() {
@@ -20,11 +23,31 @@ export default function Home() {
   const featured = getFeaturedProducts().slice(0, 3);
   const categories = getAllCategories().filter((category) => products.some((product) => product.categoryId === category.id));
   const heroImages = products.slice(0, 2);
+  const promotionProduct = getProductBySlug(promotionProductSlug);
+  if (!promotionProduct) throw new Error(`No se encontró el producto promocional: ${promotionProductSlug}`);
+  const promotionImage = promotionProduct.images.find((image) => image.isPrimary) ?? promotionProduct.images[0];
+  if (!promotionImage?.src.startsWith("/")) throw new Error(`El producto promocional ${promotionProductSlug} no tiene una imagen local válida`);
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   const whatsappUrl = buildWhatsAppUrl(whatsapp);
+  const promotionMessage = [
+    "Hola, quiero solicitar información sobre la promoción de llaveros.",
+    "",
+    "Cupón: LLAVERO",
+    `Producto: ${promotionProduct.name}`,
+    ...(promotionProduct.sku ? [`Referencia: ${promotionProduct.sku}`] : []),
+  ].join("\n");
+  const promotionWhatsappUrl = buildWhatsAppUrl(whatsapp, promotionMessage);
 
   return <main>
-    <section className="overflow-hidden border-b border-[var(--line-soft)]"><div className="page-container relative grid min-h-[660px] grid-cols-1 gap-10 py-12 lg:grid-cols-12 lg:items-center lg:py-20"><span className="font-technical absolute left-0 top-5 text-[9px] uppercase tracking-[.12em] text-[var(--muted)]">Ref. portada / edición digital</span><div className="relative z-10 lg:col-span-6"><span className="font-technical inline-block bg-[var(--signal)] px-2 py-1 text-[10px] uppercase tracking-[.08em] text-white">Más de 20 años de experiencia</span><h1 className="mt-6 max-w-2xl text-[clamp(3rem,6vw,4.5rem)] leading-[.98]">Publicidad que<br /><em className="text-[var(--signal)]">la gente se lleva.</em></h1><p className="mt-7 max-w-md text-base leading-7 text-[var(--muted)]">Productos promocionales personalizados para empresas, eventos y marcas en Colombia. Convierte una idea en un objeto que se puede tocar, usar y recordar.</p><div className="mt-9 flex flex-wrap gap-3"><ButtonLink href="/catalogo">Explorar catálogo</ButtonLink>{whatsappUrl ? <a href={whatsappUrl} className="font-technical inline-flex min-h-11 items-center border border-[var(--ink)] px-5 text-xs font-semibold uppercase tracking-[.06em] hover:bg-[var(--ink)] hover:text-[var(--paper)]">Cotizar por WhatsApp</a> : null}</div></div><div className="relative min-h-[390px] lg:col-span-6 lg:min-h-[520px]">{heroImages[0] ? <Link href={`/producto/${heroImages[0].slug}`} className="absolute right-0 top-0 h-[72%] w-[72%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[0].images[0]?.src ?? null} alt={heroImages[0].name} priority sizes="(max-width: 1024px) 72vw, 36vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[0].name}</span></Link> : null}{heroImages[1] ? <Link href={`/producto/${heroImages[1].slug}`} className="absolute bottom-2 left-0 z-10 h-[48%] w-[52%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[1].images[0]?.src ?? null} alt={heroImages[1].name} sizes="(max-width: 1024px) 52vw, 26vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[1].name}</span></Link> : null}<span aria-hidden="true" className="absolute right-0 top-1/2 h-8 w-8 -translate-y-1/2 border border-[var(--signal)] before:absolute before:left-1/2 before:top-0 before:h-full before:w-px before:bg-[var(--signal)] after:absolute after:left-0 after:top-1/2 after:h-px after:w-full after:bg-[var(--signal)]" /></div></div></section>
+    <PromotionSplash
+      productName={promotionProduct.name}
+      productReference={promotionProduct.sku}
+      productHref={`/producto/${promotionProduct.slug}`}
+      imageSrc={promotionImage.src}
+      imageAlt={promotionImage.alt}
+      whatsappUrl={promotionWhatsappUrl}
+    />
+    <section className="overflow-hidden border-b border-[var(--line-soft)]"><div className="page-container relative grid min-h-[660px] grid-cols-1 gap-10 py-12 lg:grid-cols-12 lg:items-center lg:py-20"><span className="font-technical absolute left-0 top-5 text-[9px] uppercase tracking-[.12em] text-[var(--muted)]">Ref. portada / edición digital</span><div className="relative z-10 lg:col-span-6"><span className="font-technical inline-block bg-[var(--signal)] px-2 py-1 text-[10px] uppercase tracking-[.08em] text-white">Más de 20 años de experiencia</span><h1 className="mt-6 max-w-2xl text-[clamp(3rem,6vw,4.5rem)] leading-[.98]">Publicidad que<br /><em className="text-[var(--signal)]">la gente se lleva.</em></h1><p className="mt-7 max-w-md text-base leading-7 text-[var(--muted)]">Productos promocionales personalizados para empresas, eventos y marcas en Colombia. Convierte una idea en un objeto que se puede tocar, usar y recordar.</p><div className="mt-9 flex flex-wrap gap-3"><ButtonLink href="/catalogo">Explorar catálogo</ButtonLink>{whatsappUrl ? <a href={whatsappUrl} className="font-technical inline-flex min-h-11 items-center border border-[var(--ink)] px-5 text-xs font-semibold uppercase tracking-[.06em] hover:bg-[var(--ink)] hover:text-[var(--paper)]">Cotizar por WhatsApp</a> : null}</div></div><div className="relative min-h-[390px] lg:col-span-6 lg:min-h-[520px]">{heroImages[0] ? <Link href={`/producto/${heroImages[0].slug}`} className="absolute right-0 top-0 h-[72%] w-[72%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[0].images[0]?.src ?? null} alt={heroImages[0].name} preload sizes="(max-width: 1024px) 72vw, 36vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[0].name}</span></Link> : null}{heroImages[1] ? <Link href={`/producto/${heroImages[1].slug}`} className="absolute bottom-2 left-0 z-10 h-[48%] w-[52%] bg-white p-2"><CropMarks /><div className="relative h-full"><ProductImage src={heroImages[1].images[0]?.src ?? null} alt={heroImages[1].name} sizes="(max-width: 1024px) 52vw, 26vw" /></div><span className="font-technical absolute bottom-4 left-4 bg-[var(--paper)] px-2 py-1 text-[9px] uppercase">{heroImages[1].name}</span></Link> : null}<span aria-hidden="true" className="absolute right-0 top-1/2 h-8 w-8 -translate-y-1/2 border border-[var(--signal)] before:absolute before:left-1/2 before:top-0 before:h-full before:w-px before:bg-[var(--signal)] after:absolute after:left-0 after:top-1/2 after:h-px after:w-full after:bg-[var(--signal)]" /></div></div></section>
 
     <section id="categorias" className="scroll-mt-20 bg-[var(--stone-low)] py-16 lg:py-20"><div className="page-container"><div className="flex items-end justify-between border-t border-[var(--ink)] pt-3"><h2 className="text-[clamp(2rem,4vw,2.65rem)] uppercase">Nuestras categorías</h2><span className="font-technical hidden text-[9px] uppercase tracking-[.1em] text-[var(--muted)] sm:block">Catálogo local / {categories.length.toString().padStart(2,"0")} secciones</span></div>{categories.length ? <div className="mt-9 grid border-l border-t border-[var(--ink)] sm:grid-cols-2 lg:grid-cols-5">{categories.map((category,index) => <Link href={`/catalogo/${category.slug}`} key={category.id} className="group flex min-h-48 flex-col justify-between border-b border-r border-[var(--ink)] p-5 transition hover:bg-[var(--ink)] hover:text-[var(--paper)]"><span className="font-technical text-[9px] text-[var(--muted)] group-hover:text-[var(--paper)]">{String(index+1).padStart(2,"0")}/</span><h3 className="text-2xl uppercase leading-tight">{category.name}</h3><ArrowRightIcon className="h-5 w-5 self-end text-[var(--signal)]" /></Link>)}</div> : <p className="border-b border-[var(--ink)] py-12 text-[var(--muted)]">El catálogo todavía no tiene categorías disponibles.</p>}<div className="mt-6 text-right"><Link href="/catalogo" className="font-technical text-xs uppercase underline underline-offset-4">Ver todo el catálogo →</Link></div></div></section>
 

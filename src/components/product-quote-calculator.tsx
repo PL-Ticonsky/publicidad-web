@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
 
 import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,21 @@ import { getAdditionalsByIds } from "@/data/additionals";
 import { getTechniquesByIds } from "@/data/techniques";
 import { trackCommerceEvent } from "@/lib/analytics";
 import { formatCOP } from "@/lib/format";
+import {
+  CONTACT_LIMITS,
+  normalizeContact,
+  validateContact,
+  type ContactErrors,
+  type ContactField,
+  type QuoteContact,
+} from "@/lib/quotation/contact";
 import { calculateQuote, QuoteValidationError } from "@/lib/quotation/calculate-quote";
+import { presentQuote } from "@/lib/quotation/present-quote";
+import type { QuoteResult } from "@/lib/quotation/types";
+import { MAX_QUANTITY_DIGITS, MAX_QUOTE_QUANTITY } from "@/lib/quotation/validate-quotation";
 import { buildWhatsAppMessage } from "@/lib/whatsapp/build-whatsapp-message";
 import { buildWhatsAppUrl } from "@/lib/whatsapp/build-whatsapp-url";
 import type { Product } from "@/types/product";
-import type { QuoteContact, QuoteResult } from "@/types/quotation";
-
-interface FieldErrors {
-  quantity?: string;
-  technique?: string;
-  name?: string;
-  city?: string;
-  phone?: string;
-  email?: string;
-}
 
 const initialContact: QuoteContact = {
   name: "",
@@ -35,37 +36,21 @@ const initialContact: QuoteContact = {
   designNotes: "",
 };
 
-function contactErrors(contact: QuoteContact): FieldErrors {
-  const errors: FieldErrors = {};
-  if (!contact.name.trim()) errors.name = "Ingresa tu nombre.";
-  if (!contact.city.trim()) errors.city = "Ingresa tu ciudad.";
-  if (contact.phone.trim() && contact.phone.replace(/\D/g, "").length < 7) {
-    errors.phone = "Ingresa un teléfono válido con al menos 7 dígitos.";
-  }
-  if (contact.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
-    errors.email = "Ingresa un correo válido.";
-  }
-  return errors;
-}
-
-function money(value: number | null): string {
-  return value === null ? "Pendiente de validación" : formatCOP(value);
-}
-
 export function ProductQuoteCalculator({ product }: { product: Product }) {
   const techniques = useMemo(() => getTechniquesByIds(product.availableTechniqueIds), [product.availableTechniqueIds]);
   const additionals = useMemo(() => getAdditionalsByIds(product.availableAdditionalIds), [product.availableAdditionalIds]);
   const defaultTechnique = techniques.find((technique) => technique.default) ?? techniques[0];
-  const [quantity, setQuantity] = useState(product.minimumQuantity);
+  const [quantityInput, setQuantityInput] = useState(String(product.minimumQuantity));
   const [techniqueId, setTechniqueId] = useState(defaultTechnique?.id ?? "");
   const [additionalIds, setAdditionalIds] = useState<string[]>([]);
   const [contact, setContact] = useState<QuoteContact>(initialContact);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<ContactErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [artwork, setArtwork] = useState<File | null>(null);
+  const [isOpening, setIsOpening] = useState(false);
+  const openingLockRef = useRef(false);
 
-  const selectedTechnique = techniques.find((technique) => technique.id === techniqueId);
-  const selectedAdditionals = additionals.filter((additional) => additionalIds.includes(additional.id));
+  const quantity = Number(quantityInput);
   const calculation = useMemo<{ result: QuoteResult | null; error: string | null }>(() => {
     try {
       return {
@@ -80,30 +65,43 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
     }
   }, [additionalIds, product, quantity, techniqueId]);
 
-  const errors = contactErrors(contact);
+  const errors = validateContact(contact);
   const canSubmit = Boolean(
     calculation.result
     && !calculation.error
-    && !errors.name
-    && !errors.city
-    && !errors.phone
-    && !errors.email,
+    && Object.keys(errors).length === 0
+    && !isOpening,
   );
 
-  function updateContact(field: keyof QuoteContact, value: string) {
+  function resetOpeningAttempt() {
+    openingLockRef.current = false;
+    setIsOpening(false);
+  }
+
+  function updateContact(field: ContactField, value: string) {
+    resetOpeningAttempt();
     setContact((current) => ({ ...current, [field]: value }));
     setFieldErrors((current) => ({ ...current, [field]: undefined }));
     setFormError(null);
   }
 
-  function validateField(field: keyof QuoteContact) {
-    const nextErrors = contactErrors(contact);
-    if (field === "name" || field === "city" || field === "phone" || field === "email") {
-      setFieldErrors((current) => ({ ...current, [field]: nextErrors[field] }));
-    }
+  function validateField(field: ContactField) {
+    const nextErrors = validateContact(contact);
+    setFieldErrors((current) => ({ ...current, [field]: nextErrors[field] }));
+  }
+
+  function updateQuantity(value: string) {
+    resetOpeningAttempt();
+    setQuantityInput(value.slice(0, MAX_QUANTITY_DIGITS));
+    setFormError(null);
+  }
+
+  function setValidQuantity(value: number) {
+    updateQuantity(String(Math.min(MAX_QUOTE_QUANTITY, Math.max(product.minimumQuantity, value))));
   }
 
   function toggleAdditional(id: string) {
+    resetOpeningAttempt();
     setAdditionalIds((current) => current.includes(id)
       ? current.filter((item) => item !== id)
       : [...current, id]);
@@ -111,7 +109,9 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextErrors = contactErrors(contact);
+    if (openingLockRef.current) return;
+
+    const nextErrors = validateContact(contact);
     setFieldErrors(nextErrors);
     setFormError(null);
 
@@ -124,38 +124,39 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
       return;
     }
 
-    const message = buildWhatsAppMessage({
-      product,
-      quantity,
-      techniqueName: selectedTechnique?.name,
-      additionalNames: selectedAdditionals.map((additional) => additional.name),
-      contact,
-      result: calculation.result,
-    });
+    const normalizedContact = normalizeContact(contact);
+    const message = buildWhatsAppMessage({ contact: normalizedContact, result: calculation.result });
     const url = buildWhatsAppUrl(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER, message);
     if (!url) {
-      setFormError("No está configurado el número de WhatsApp.");
+      setFormError("El canal de WhatsApp no tiene una configuración internacional válida.");
       return;
     }
 
+    // El ref se actualiza de forma síncrona; useState por sí solo no detiene dos
+    // eventos submit que ocurren antes del siguiente render de React.
+    openingLockRef.current = true;
+    setIsOpening(true);
     trackCommerceEvent("begin_quote", {
       product_id: product.id,
-      quantity,
-      total: calculation.result.estimatedTotal,
+      quantity: calculation.result.quantity,
+      total: calculation.result.estimatedTotalCop,
+      estimate_status: calculation.result.status,
     });
-    trackCommerceEvent("quote_completed", { product_id: product.id });
+    trackCommerceEvent("quote_completed", { product_id: product.id, estimate_status: calculation.result.status });
     trackCommerceEvent("whatsapp_click", { product_id: product.id });
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   const result = calculation.result;
-  const quoteOnly = result?.status === "quote-only";
   const primaryImage = product.images.find((image) => image.isPrimary) ?? product.images[0];
+  const lowestBasePrice = product.priceTiers.length
+    ? Math.min(...product.priceTiers.map((tier) => tier.unitPrice))
+    : null;
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-x-6 pb-32 lg:grid-cols-[minmax(0,1fr)_340px] lg:pb-0" noValidate>
       <header className="border-t border-[var(--ink)] py-8 lg:col-start-1">
-        <p className="eyebrow">Orden de cotización / borrador local</p>
+        <p className="eyebrow">Solicitud estimada / borrador local</p>
         <h1 className="mt-4 text-[clamp(2.5rem,5vw,3.5rem)] leading-none">Configuremos tu pedido</h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">
           Define la cantidad, la personalización y los datos que quieres incluir. Nada se guarda: el resumen se prepara en tu navegador y se envía a WhatsApp.
@@ -164,8 +165,8 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
       <section className="relative border border-[var(--ink)] bg-[var(--stone-low)] p-5 lg:col-start-1 lg:p-7">
         <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-4">
-          <h2 className="font-technical text-[10px] uppercase tracking-[.08em]">Manifiesto de producción #001</h2>
-          <span className="font-technical text-[9px] uppercase text-[var(--muted)]">{product.sku ? `Ref. ${product.sku}` : "Referencia sin SKU"}</span>
+          <h2 className="font-technical text-xs uppercase tracking-[.08em]">Resumen del producto</h2>
+          <span className="font-technical text-xs uppercase text-[var(--muted)]">{product.sku ? `Ref. ${product.sku}` : "Referencia sin SKU"}</span>
         </div>
         <div className="mt-5 grid gap-5 sm:grid-cols-[150px_1fr]">
           <div className="relative aspect-[4/5] border border-[var(--line)] bg-white grayscale">
@@ -173,10 +174,11 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
           </div>
           <div className="flex flex-col justify-center">
             <h2 className="text-2xl leading-tight">{product.name}</h2>
-            <dl className="font-technical mt-5 grid grid-cols-2 gap-4 text-[9px] uppercase text-[var(--muted)]">
+            <dl className="font-technical mt-5 grid grid-cols-2 gap-4 text-xs uppercase text-[var(--muted)]">
               <div><dt>Pedido mínimo</dt><dd className="mt-1 text-[var(--ink)]">{product.minimumQuantity.toLocaleString("es-CO")} unidades</dd></div>
-              <div><dt>Valor estimado desde</dt><dd className="mt-1 text-[var(--ink)]">{product.priceTiers.length ? formatCOP(Math.min(...product.priceTiers.map((tier) => tier.unitPrice))) : "Por validar"}</dd></div>
+              <div><dt>Precio base por unidad, desde</dt><dd className="mt-1 text-[var(--ink)]">{lowestBasePrice === null ? "Por validar" : formatCOP(lowestBasePrice)}</dd></div>
             </dl>
+            <p className="mt-3 text-xs leading-5 text-[var(--muted)]">“Desde” corresponde al tramo de mayor volumen; no incluye personalización, cargos fijos ni IVA.</p>
           </div>
         </div>
       </section>
@@ -190,15 +192,15 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
         <label htmlFor="cantidad" className="mt-7 block text-sm font-bold">
           Cantidad
           <span className="mt-2 grid grid-cols-[48px_1fr_48px] border border-[var(--line)] bg-[var(--surface)]">
-            <button type="button" className="min-h-12 border-r border-[var(--line)] text-xl" onClick={() => setQuantity((value) => Math.max(product.minimumQuantity, value - 1))} aria-label="Reducir cantidad">−</button>
-            <input id="cantidad" type="number" min={product.minimumQuantity} step="1" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} aria-invalid={Boolean(calculation.error)} aria-describedby="cantidad-ayuda cantidad-error" className="min-w-0 bg-transparent px-3 text-center font-semibold outline-none" required />
-            <button type="button" className="min-h-12 border-l border-[var(--line)] text-xl" onClick={() => setQuantity((value) => value + 1)} aria-label="Aumentar cantidad">+</button>
+            <button type="button" className="min-h-12 border-r border-[var(--line)] text-xl" onClick={() => setValidQuantity((Number.isSafeInteger(quantity) ? quantity : product.minimumQuantity) - 1)} aria-label="Reducir cantidad">−</button>
+            <input id="cantidad" aria-label="Cantidad" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={MAX_QUANTITY_DIGITS} value={quantityInput} onChange={(event) => updateQuantity(event.target.value)} aria-invalid={Boolean(calculation.error)} aria-describedby="cantidad-ayuda cantidad-error" className="min-w-0 bg-transparent px-3 text-center font-semibold outline-none" required />
+            <button type="button" className="min-h-12 border-l border-[var(--line)] text-xl" onClick={() => setValidQuantity((Number.isSafeInteger(quantity) ? quantity : product.minimumQuantity) + 1)} aria-label="Aumentar cantidad">+</button>
           </span>
-          <span id="cantidad-ayuda" className="mt-2 block text-xs text-[var(--muted)]">Pedido mínimo: {product.minimumQuantity.toLocaleString("es-CO")} unidades</span>
+          <span id="cantidad-ayuda" className="mt-2 block text-xs text-[var(--muted)]">Entre {product.minimumQuantity.toLocaleString("es-CO")} y {MAX_QUOTE_QUANTITY.toLocaleString("es-CO")} unidades. Máximo temporal pendiente de aprobación comercial.</span>
           {calculation.error ? <span id="cantidad-error" className="mt-1 block text-xs font-semibold text-[var(--color-error)]">{calculation.error}</span> : null}
           <span className="mt-4 grid gap-2 sm:grid-cols-3">
             {product.priceTiers.map((tier) => (
-              <button key={tier.id} type="button" onClick={() => setQuantity(tier.minQuantity)} className={`font-technical flex min-h-14 items-center justify-between border px-3 text-[9px] uppercase ${result?.selectedTier?.id === tier.id ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] bg-[var(--surface)]"}`}>
+              <button key={tier.id} type="button" onClick={() => setValidQuantity(tier.minQuantity)} className={`font-technical flex min-h-14 items-center justify-between border px-3 text-xs uppercase ${result?.selectedTier?.id === tier.id ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] bg-[var(--surface)]"}`}>
                 <span>{tier.minQuantity.toLocaleString("es-CO")}–{tier.maxQuantity?.toLocaleString("es-CO") ?? "+"}</span>
                 <span>{formatCOP(tier.unitPrice)}/u</span>
               </button>
@@ -212,7 +214,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
             <div className="mt-2 border-t border-[var(--line)]">
               {techniques.map((technique) => (
                 <label key={technique.id} className="flex cursor-pointer items-start gap-3 border-b border-[var(--line)] py-4">
-                  <input type="radio" name="tecnica" value={technique.id} checked={techniqueId === technique.id} onChange={(event) => setTechniqueId(event.target.value)} className="mt-1 h-4 w-4 accent-[var(--signal)]" />
+                  <input type="radio" name="tecnica" value={technique.id} checked={techniqueId === technique.id} onChange={(event) => { resetOpeningAttempt(); setTechniqueId(event.target.value); }} className="mt-1 h-4 w-4 accent-[var(--signal)]" />
                   <span className="flex-1">
                     <span className="block text-sm font-semibold">{technique.name}</span>
                     {technique.description ? <span className="mt-1 block text-xs text-[var(--muted)]">{technique.description}</span> : null}
@@ -220,7 +222,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
                   <span className="text-right text-xs">
                     {technique.setupPrice ? `${formatCOP(technique.setupPrice)} preparación` : "Sin costo fijo"}
                     <br />
-                    {technique.pricingMode === "per-unit" ? `+ ${formatCOP(technique.price)}/u` : "Incluida"}
+                    {technique.pricingMode === "per-unit" ? `+ ${formatCOP(technique.price)}/u` : technique.pricingMode === "fixed" ? formatCOP(technique.price) : "Incluida"}
                   </span>
                 </label>
               ))}
@@ -240,8 +242,8 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
                     {additional.description ? <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{additional.description}</span> : null}
                   </span>
                   <span className="text-sm font-bold text-[var(--signal)]">
-                    {additional.price === 0 ? "Por validar" : formatCOP(additional.price)}
-                    {additional.pricingMode === "per-unit" ? "/u" : ""}
+                    {additional.pricingStatus === "requiresQuote" ? "Requiere validación" : formatCOP(additional.priceCop)}
+                    {additional.pricingStatus === "priced" && additional.pricingMode === "per-unit" ? "/u" : ""}
                   </span>
                 </label>
               ))}
@@ -253,42 +255,36 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
       <section className="space-y-8 border-t border-[var(--line-soft)] py-8 lg:col-start-1">
         <div className="grid gap-5 bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
-            <h2 className="font-technical text-[10px] uppercase tracking-[.08em]">Archivo o referencia gráfica</h2>
-            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">El archivo permanece solo en este dispositivo. WhatsApp no permite adjuntarlo automáticamente; podrás enviarlo en la conversación.</p>
-            {artwork ? <p className="font-technical mt-2 text-[9px] uppercase text-[var(--signal)]">Seleccionado: {artwork.name}</p> : null}
+            <h2 className="font-technical text-xs uppercase tracking-[.08em]">Archivo o referencia gráfica</h2>
+            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">El archivo permanece solo en este dispositivo. WhatsApp no permite adjuntarlo automáticamente; deberás enviarlo en la conversación.</p>
+            {artwork ? <p className="font-technical mt-2 text-xs uppercase text-[var(--signal)]">Seleccionado localmente: {artwork.name}</p> : null}
           </div>
           <div className="flex gap-2">
-            <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--ink)] px-4 text-[10px] uppercase text-[var(--paper)]">
-              <input type="file" className="sr-only" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" onChange={(event) => setArtwork(event.target.files?.[0] ?? null)} />
+            <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--ink)] px-4 text-xs uppercase text-[var(--paper)]">
+              <input type="file" className="sr-only" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" onChange={(event) => { resetOpeningAttempt(); setArtwork(event.target.files?.[0] ?? null); }} />
               {artwork ? "Reemplazar archivo" : "Seleccionar archivo"}
             </label>
-            {artwork ? <button type="button" onClick={() => setArtwork(null)} className="font-technical min-h-11 border border-[var(--ink)] px-3 text-[9px] uppercase">Quitar</button> : null}
+            {artwork ? <button type="button" onClick={() => { resetOpeningAttempt(); setArtwork(null); }} className="font-technical min-h-11 border border-[var(--ink)] px-3 text-xs uppercase">Quitar</button> : null}
           </div>
         </div>
-        <label htmlFor="designNotes" className="font-technical block text-[10px] uppercase tracking-[.08em]">
-          Observaciones del diseño
-          <Textarea id="designNotes" rows={3} value={contact.designNotes} onChange={(event) => updateContact("designNotes", event.target.value)} className="font-sans normal-case" placeholder="Color, ubicación del logo, número de tintas u otras instrucciones." />
-        </label>
-        <label htmlFor="comments" className="font-technical block text-[10px] uppercase tracking-[.08em]">
-          Comentarios
-          <Textarea id="comments" rows={3} value={contact.comments} onChange={(event) => updateContact("comments", event.target.value)} className="font-sans normal-case" placeholder="Fecha requerida, empaque, entrega u otra información comercial." />
-        </label>
+        <ContactTextarea id="designNotes" label="Observaciones del diseño" value={contact.designNotes} error={fieldErrors.designNotes} maxLength={CONTACT_LIMITS.designNotes} onChange={(value) => updateContact("designNotes", value)} onBlur={() => validateField("designNotes")} placeholder="Color, ubicación del logo, número de tintas u otras instrucciones." />
+        <ContactTextarea id="comments" label="Comentarios" value={contact.comments} error={fieldErrors.comments} maxLength={CONTACT_LIMITS.comments} onChange={(value) => updateContact("comments", value)} onBlur={() => validateField("comments")} placeholder="Fecha requerida, empaque, entrega u otra información comercial." />
       </section>
 
-      <QuoteSummary product={product} quantity={quantity} result={result} quoteOnly={quoteOnly} canSubmit={canSubmit} />
+      <QuoteSummary result={result} canSubmit={canSubmit} isOpening={isOpening} />
 
       <section className="border-y border-[var(--line)] py-8 lg:col-start-1">
         <div className="flex items-center gap-3 border-b border-[var(--line-soft)] pb-3">
           <span className="font-technical text-xs text-[var(--signal)]">MÓDULO 03</span>
           <h2 className="text-xl">Información para el mensaje</h2>
         </div>
-        <p className="mt-3 text-sm text-[var(--muted)]">Estos datos solo se incorporan al mensaje de WhatsApp. No se guardan ni se envían a un servidor.</p>
+        <p className="mt-3 text-sm text-[var(--muted)]">Estos datos solo se incorporan al mensaje de WhatsApp. No se guardan ni se envían a un servidor propio.</p>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <ContactField id="name" label="Nombre *" value={contact.name} error={fieldErrors.name} autoComplete="name" onChange={(value) => updateContact("name", value)} onBlur={() => validateField("name")} />
-          <ContactField id="company" label="Empresa" value={contact.company} autoComplete="organization" onChange={(value) => updateContact("company", value)} />
-          <ContactField id="city" label="Ciudad *" value={contact.city} error={fieldErrors.city} autoComplete="address-level2" onChange={(value) => updateContact("city", value)} onBlur={() => validateField("city")} />
-          <ContactField id="phone" label="Teléfono (opcional)" value={contact.phone} error={fieldErrors.phone} type="tel" autoComplete="tel" onChange={(value) => updateContact("phone", value)} onBlur={() => validateField("phone")} />
-          <ContactField id="email" label="Email (opcional)" value={contact.email} error={fieldErrors.email} type="email" autoComplete="email" onChange={(value) => updateContact("email", value)} onBlur={() => validateField("email")} className="sm:col-span-2" />
+          <ContactInput id="name" label="Nombre *" value={contact.name} error={fieldErrors.name} maxLength={CONTACT_LIMITS.name} autoComplete="name" onChange={(value) => updateContact("name", value)} onBlur={() => validateField("name")} />
+          <ContactInput id="company" label="Empresa" value={contact.company} error={fieldErrors.company} maxLength={CONTACT_LIMITS.company} autoComplete="organization" onChange={(value) => updateContact("company", value)} onBlur={() => validateField("company")} />
+          <ContactInput id="city" label="Ciudad *" value={contact.city} error={fieldErrors.city} maxLength={CONTACT_LIMITS.city} autoComplete="address-level2" onChange={(value) => updateContact("city", value)} onBlur={() => validateField("city")} />
+          <ContactInput id="phone" label="Teléfono (opcional)" value={contact.phone} error={fieldErrors.phone} maxLength={CONTACT_LIMITS.phone} type="tel" autoComplete="tel" onChange={(value) => updateContact("phone", value)} onBlur={() => validateField("phone")} />
+          <ContactInput id="email" label="Email (opcional)" value={contact.email} error={fieldErrors.email} maxLength={CONTACT_LIMITS.email} type="email" autoComplete="email" onChange={(value) => updateContact("email", value)} onBlur={() => validateField("email")} className="sm:col-span-2" />
         </div>
       </section>
 
@@ -296,41 +292,49 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--ink)] bg-[var(--stone-highest)] px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 lg:hidden">
         <div className="mx-auto flex max-w-lg items-end justify-between gap-4">
-          <div><p className="font-technical text-[8px] uppercase text-[var(--muted)]">{quoteOnly ? "Precio" : "Total estimado"}</p><p className="tabular-nums text-lg font-bold">{quoteOnly ? "Por validar" : money(result?.estimatedTotal ?? null)}</p></div>
-          <Button type="submit" disabled={!canSubmit} variant="secondary" className="min-h-12 px-4">Solicitar cotización</Button>
+          <div><p className="font-technical text-xs uppercase text-[var(--muted)]">{result?.status === "partial" ? "Total parcial" : result?.status === "requiresQuote" ? "Precio" : "Total estimado"}</p><p className="tabular-nums text-lg font-bold">{result?.estimatedTotalCop === null || result?.estimatedTotalCop === undefined ? "Por validar" : formatCOP(result.estimatedTotalCop)}</p></div>
+          <Button type="submit" disabled={!canSubmit} variant="secondary" className="min-h-12 px-4">{isOpening ? "Solicitud preparada" : "Continuar en WhatsApp"}</Button>
         </div>
       </div>
       <p className="mt-4 flex items-center gap-2 text-xs leading-5 text-[var(--muted)] lg:col-start-1">
-        <ShieldIcon className="h-4 w-4 shrink-0" /> No guardamos tus datos ni esta cotización. Al continuar se abrirá WhatsApp en una pestaña nueva.
+        <ShieldIcon className="h-4 w-4 shrink-0" /> No guardamos tus datos ni esta solicitud. Al continuar se abrirá WhatsApp una sola vez en una pestaña nueva.
       </p>
     </form>
   );
 }
 
-function QuoteSummary({ product, quantity, result, quoteOnly, canSubmit }: { product: Product; quantity: number; result: QuoteResult | null; quoteOnly: boolean; canSubmit: boolean }) {
+function QuoteSummary({ result, canSubmit, isOpening }: { result: QuoteResult | null; canSubmit: boolean; isOpening: boolean }) {
+  const presentation = result ? presentQuote(result) : null;
   return (
-    <section className="hidden border border-[var(--ink)] bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:row-span-6 lg:block lg:self-start">
-      <h2 className="font-technical border-b border-[var(--line-soft)] pb-4 text-[10px] uppercase tracking-[.16em]">Resumen de solicitud</h2>
-      <p className="mt-5 text-sm font-semibold">{product.name}</p>
-      <p className="font-technical mt-1 text-[9px] uppercase text-[var(--muted)]">× {quantity.toLocaleString("es-CO")} unidades</p>
-      {result?.selectedTier ? <p className="mt-2 text-xs text-[var(--blue-dark)]">Tramo aplicado: {result.selectedTier.minQuantity.toLocaleString("es-CO")}–{result.selectedTier.maxQuantity?.toLocaleString("es-CO") ?? "en adelante"} unidades.</p> : null}
-      {quoteOnly ? (
-        <p className="mt-6 border-y border-[var(--line-soft)] py-5 text-sm font-semibold">Precio pendiente de validación por un asesor.</p>
-      ) : (
-        <dl className="mt-4 space-y-2 text-sm">
-          <SummaryLine label="Precio base por unidad" value={money(result?.baseUnitPrice ?? null)} />
-          <SummaryLine label="Personalización" value={money(result?.techniqueCost ?? null)} />
-          <SummaryLine label="Adicionales" value={money(result?.additionalsCost ?? null)} />
-          <SummaryLine label="Subtotal estimado" value={money(result?.subtotal ?? null)} />
-          <SummaryLine label="IVA estimado (19%)" value={money(result?.taxAmount ?? null)} />
-          <div className="mt-4 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-4">
-            <dt className="font-semibold">Total estimado</dt>
-            <dd className="text-2xl font-bold">{money(result?.estimatedTotal ?? null)}</dd>
-          </div>
-        </dl>
-      )}
-      <p className="font-technical mt-6 text-[8px] uppercase leading-4 text-[var(--muted)]">El valor final puede variar según el diseño, técnica, materiales, disponibilidad, urgencia y entrega.</p>
-      <Button type="submit" disabled={!canSubmit} variant="secondary" className="mt-5 min-h-14 w-full"><WhatsAppIcon className="h-4 w-4" /> Solicitar por WhatsApp</Button>
+    <section aria-label="Desglose de la solicitud" className="border border-[var(--ink)] bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:row-span-6 lg:block lg:self-start">
+      <h2 className="font-technical border-b border-[var(--line-soft)] pb-4 text-xs uppercase tracking-[.16em]">Resumen de solicitud</h2>
+      {result ? (
+        <>
+          <p className="mt-5 text-sm font-semibold">{result.product.name}</p>
+          <p className="font-technical mt-1 text-xs uppercase text-[var(--muted)]">× {result.quantity.toLocaleString("es-CO")} unidades</p>
+          {result.selectedTier ? <p className="mt-2 text-xs text-[var(--blue-dark)]">Tramo aplicado: {result.selectedTier.minQuantity.toLocaleString("es-CO")}–{result.selectedTier.maxQuantity?.toLocaleString("es-CO") ?? "en adelante"} unidades.</p> : null}
+          <p className={`mt-5 border-y border-[var(--line-soft)] py-3 text-sm font-bold ${result.status === "partial" ? "text-[var(--signal)]" : ""}`}>{presentation?.heading}</p>
+          {presentation && presentation.lines.length > 0 ? (
+            <dl className="mt-4 space-y-2 text-sm">
+              {presentation.lines.map((line) => <SummaryLine key={line.id} label={line.label} value={line.value} />)}
+              {presentation.totalLabel && presentation.totalValue ? (
+                <div className="mt-4 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-4">
+                  <dt className="font-semibold">{presentation.totalLabel}</dt>
+                  <dd className="text-right text-2xl font-bold">{presentation.totalValue}</dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : <p className="mt-4 text-sm">No se muestra un total hasta validar los importes pendientes.</p>}
+          {presentation && presentation.excludedCharges.length > 0 ? (
+            <div className="mt-5 border border-[var(--signal)]/30 bg-[var(--stone)] p-3 text-sm">
+              <p className="font-bold">Cargos excluidos por validar</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">{presentation.excludedCharges.map((charge) => <li key={charge}>{charge}</li>)}</ul>
+            </div>
+          ) : null}
+        </>
+      ) : <p className="mt-5 text-sm text-[var(--muted)]">Corrige la configuración para ver el desglose.</p>}
+      <p className="font-technical mt-6 text-xs uppercase leading-5 text-[var(--muted)]">Solicitud estimada, no cotización formal. Los valores requieren validación comercial.</p>
+      <Button type="submit" disabled={!canSubmit} variant="secondary" className="mt-5 min-h-14 w-full"><WhatsAppIcon className="h-4 w-4" /> {isOpening ? "Solicitud preparada" : "Continuar en WhatsApp"}</Button>
     </section>
   );
 }
@@ -339,11 +343,12 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
   return <div className="flex justify-between gap-4 text-[var(--muted)]"><dt>{label}</dt><dd className="text-right font-semibold text-[var(--ink)]">{value}</dd></div>;
 }
 
-function ContactField({ id, label, value, error, type = "text", autoComplete, className = "", onChange, onBlur }: {
+function ContactInput({ id, label, value, error, maxLength, type = "text", autoComplete, className = "", onChange, onBlur }: {
   id: string;
   label: string;
   value: string;
   error?: string;
+  maxLength: number;
   type?: "text" | "tel" | "email";
   autoComplete?: string;
   className?: string;
@@ -353,8 +358,29 @@ function ContactField({ id, label, value, error, type = "text", autoComplete, cl
   return (
     <label htmlFor={id} className={`text-sm font-bold ${className}`}>
       {label}
-      <Input id={id} type={type} autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
+      <Input id={id} aria-label={label} type={type} autoComplete={autoComplete} maxLength={maxLength} value={value} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} aria-invalid={Boolean(error)} aria-describedby={`${id}-limit${error ? ` ${id}-error` : ""}`} />
+      <span id={`${id}-limit`} className="mt-1 block text-xs font-normal text-[var(--muted)]">Máximo {maxLength.toLocaleString("es-CO")} caracteres.</span>
       {error ? <span id={`${id}-error`} className="mt-1 block text-xs font-semibold text-[var(--color-error)]">{error}</span> : null}
+    </label>
+  );
+}
+
+function ContactTextarea({ id, label, value, error, maxLength, placeholder, onChange, onBlur }: {
+  id: "comments" | "designNotes";
+  label: string;
+  value: string;
+  error?: string;
+  maxLength: number;
+  placeholder: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+}) {
+  return (
+    <label htmlFor={id} className="font-technical block text-xs uppercase tracking-[.08em]">
+      {label}
+      <Textarea id={id} aria-label={label} rows={3} value={value} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} className="font-sans normal-case" placeholder={placeholder} aria-invalid={Boolean(error)} aria-describedby={`${id}-limit${error ? ` ${id}-error` : ""}`} />
+      <span id={`${id}-limit`} className="mt-1 block font-sans text-xs font-normal normal-case tracking-normal text-[var(--muted)]">Máximo {maxLength.toLocaleString("es-CO")} caracteres.</span>
+      {error ? <span id={`${id}-error`} className="mt-1 block font-sans text-xs font-semibold normal-case tracking-normal text-[var(--color-error)]">{error}</span> : null}
     </label>
   );
 }

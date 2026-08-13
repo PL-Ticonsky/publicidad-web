@@ -1,14 +1,25 @@
 import { getAdditionalById } from "@/data/additionals";
 import { getTechniqueById } from "@/data/techniques";
-import type { QuoteInput } from "@/types/quotation";
+import type { QuoteInput } from "@/lib/quotation/types";
+
+// Límite preventivo para esta versión frontend. Requiere aprobación comercial
+// o sustitución por máximos específicos de producto cuando el negocio los defina.
+export const MAX_QUOTE_QUANTITY = 100_000;
+export const MAX_QUANTITY_DIGITS = String(MAX_QUOTE_QUANTITY).length;
 
 export function validateQuotation(input: QuoteInput): string[] {
   const errors: string[] = [];
 
-  if (!Number.isInteger(input.quantity) || input.quantity <= 0) {
-    errors.push("La cantidad debe ser un número entero positivo.");
+  if (!Number.isSafeInteger(input.quantity) || input.quantity <= 0) {
+    errors.push("La cantidad debe ser un número entero positivo y seguro.");
   } else if (input.quantity < input.product.minimumQuantity) {
     errors.push(`La cantidad mínima es de ${input.product.minimumQuantity.toLocaleString("es-CO")} unidades.`);
+  } else if (input.quantity > MAX_QUOTE_QUANTITY) {
+    errors.push(`La cantidad máxima temporal es de ${MAX_QUOTE_QUANTITY.toLocaleString("es-CO")} unidades.`);
+  }
+
+  if (input.product.pricingType === "fixed") {
+    errors.push("Este modo de precio aún no tiene una regla comercial aprobada.");
   }
 
   if (input.product.availableTechniqueIds.length > 0) {
@@ -23,6 +34,10 @@ export function validateQuotation(input: QuoteInput): string[] {
     (id) => !input.product.availableAdditionalIds.includes(id) || !getAdditionalById(id),
   );
   if (invalidAdditional) errors.push("Uno de los adicionales seleccionados no está disponible para este producto.");
+
+  if (new Set(input.additionalIds).size !== input.additionalIds.length) {
+    errors.push("No se puede seleccionar el mismo adicional más de una vez.");
+  }
 
   return errors;
 }

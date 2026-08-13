@@ -1,24 +1,33 @@
-import { formatCOP } from "@/lib/format";
-import type { WhatsAppQuote } from "@/types/quotation";
+import { normalizeContact, type QuoteContact } from "@/lib/quotation/contact";
+import { presentQuote } from "@/lib/quotation/present-quote";
+import type { QuoteResult } from "@/lib/quotation/types";
 
 function valueOrFallback(value: string, fallback = "No indicado"): string {
   return value.trim() || fallback;
 }
 
+export interface WhatsAppQuote {
+  contact: QuoteContact;
+  result: QuoteResult;
+}
+
 export function buildWhatsAppMessage(quote: WhatsAppQuote): string {
-  const { contact, product, result } = quote;
-  const priceLines =
-    result.status === "quote-only" || result.estimatedTotal === null || result.finalUnitPrice === null
-      ? ["Precio: pendiente de validación por un asesor."]
-      : [
-          `Precio estimado por unidad: ${formatCOP(result.finalUnitPrice)}`,
-          `Subtotal estimado: ${formatCOP(result.subtotal ?? 0)}`,
-          `IVA estimado (19%): ${formatCOP(result.taxAmount ?? 0)}`,
-          `Total estimado: ${formatCOP(result.estimatedTotal)}`,
-        ];
+  const contact = normalizeContact(quote.contact);
+  const { result } = quote;
+  const presentation = presentQuote(result);
+  const priceLines = presentation.lines.map((line) => `${line.label}: ${line.value}`);
+  if (presentation.totalLabel && presentation.totalValue) {
+    priceLines.push(`${presentation.totalLabel}: ${presentation.totalValue}`);
+  }
+  if (presentation.excludedCharges.length > 0) {
+    priceLines.push(`Cargos excluidos por validar: ${presentation.excludedCharges.join(", ")}`);
+  }
+  if (result.status === "requiresQuote") {
+    priceLines.push("No se muestra un total hasta validar los importes pendientes.");
+  }
 
   return [
-    "Hola, deseo solicitar una cotización.",
+    "Hola, deseo enviar una solicitud estimada.",
     "",
     "DATOS DEL CLIENTE",
     `Nombre: ${valueOrFallback(contact.name)}`,
@@ -28,18 +37,18 @@ export function buildWhatsAppMessage(quote: WhatsAppQuote): string {
     `Email: ${valueOrFallback(contact.email)}`,
     "",
     "PRODUCTO",
-    `Producto: ${product.name}`,
-    `Cantidad: ${quote.quantity.toLocaleString("es-CO")}`,
-    `Técnica: ${quote.techniqueName ?? "No aplica"}`,
-    `Adicionales: ${quote.additionalNames.length > 0 ? quote.additionalNames.join(", ") : "Ninguno"}`,
+    `Producto: ${result.product.name}`,
+    `Cantidad: ${result.quantity.toLocaleString("es-CO")}`,
+    `Técnica: ${result.technique?.name ?? "No aplica"}`,
+    `Adicionales: ${result.additionals.length > 0 ? result.additionals.map((additional) => additional.name).join(", ") : "Ninguno"}`,
     "",
-    "ESTIMACIÓN",
+    presentation.heading.toUpperCase(),
     ...priceLines,
     "",
     "COMENTARIOS",
     valueOrFallback(contact.comments, "Sin comentarios"),
     `Observaciones del diseño: ${valueOrFallback(contact.designNotes, "Sin observaciones")}`,
     "",
-    "El valor final puede variar según el diseño, técnica de personalización, materiales, disponibilidad, urgencia y condiciones de entrega.",
+    "Esta es una solicitud estimada, no una cotización formal. Los valores pueden variar tras la validación comercial.",
   ].join("\n");
 }

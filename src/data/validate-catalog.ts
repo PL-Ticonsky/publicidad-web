@@ -41,6 +41,12 @@ export function assertCatalogIntegrity(): void {
   if (duplicateTechniqueIds.length) errors.push(`IDs de técnica duplicados: ${duplicateTechniqueIds.join(", ")}`);
   if (duplicateAdditionalIds.length) errors.push(`IDs de adicional duplicados: ${duplicateAdditionalIds.join(", ")}`);
 
+  additionals.forEach((additional) => {
+    if (additional.pricingStatus === "priced" && (!Number.isSafeInteger(additional.priceCop) || additional.priceCop <= 0)) {
+      errors.push(`${additional.id}: un adicional con precio debe tener un valor COP entero positivo.`);
+    }
+  });
+
   products.forEach((product) => {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(product.slug)) {
       errors.push(`${product.slug}: el slug no tiene un formato válido.`);
@@ -135,20 +141,12 @@ export function assertCatalogIntegrity(): void {
             additionalIds,
           });
 
-          if (result.status !== "estimated" || result.selectedTier?.id !== tier.id || result.estimatedTotal === null || result.estimatedTotal <= 0) {
+          if (result.status === "requiresQuote" || result.selectedTier?.id !== tier.id || result.estimatedTotalCop === null || result.estimatedTotalCop <= 0) {
             errors.push(`${product.slug}/${tier.id}: el motor no devolvió la estimación esperada.`);
             return;
           }
 
-          const techniqueName = techniques.find((technique) => technique.id === techniqueId)?.name;
-          const additionalNames = additionals
-            .filter((additional) => additionalIds.includes(additional.id))
-            .map((additional) => additional.name);
           const message = buildWhatsAppMessage({
-            product,
-            quantity: tier.minQuantity,
-            techniqueName,
-            additionalNames,
             contact: {
               name: "Cliente de prueba",
               company: "Empresa de prueba",

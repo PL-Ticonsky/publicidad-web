@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bodoni_Moda, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { CustomizerPreviewProvider } from "@/components/personalization/customizer-preview-provider";
 import "./globals.css";
 
 const bodoni = Bodoni_Moda({
@@ -36,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full antialiased">
-      <body className={`${bodoni.variable} ${hanken.variable} ${mono.variable} min-h-full flex flex-col`}><SiteHeader />{children}<SiteFooter /></body>
+      <body className={`${bodoni.variable} ${hanken.variable} ${mono.variable} min-h-full flex flex-col`}><SiteHeader /><CustomizerPreviewProvider>{children}</CustomizerPreviewProvider><SiteFooter /></body>
     </html>
   );
 }

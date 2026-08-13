@@ -36,4 +36,24 @@ describe("WhatsApp", () => {
     expect(message).toContain("Cargos excluidos por validar: Entrega urgente");
     expect(message).toContain("no una cotización formal");
   });
+
+  it("solo menciona el PNG cuando existe una previsualización lista", () => {
+    const result = calculateQuote({
+      product: productFixture("mouse-pad-personalizado-rectangular"),
+      quantity: 50,
+      techniqueId: "sublimacion-mouse-pad",
+      additionalIds: [],
+    });
+    const withoutPreview = buildWhatsAppMessage({ contact: validContact, result });
+    const withPreview = buildWhatsAppMessage({
+      contact: validContact,
+      result,
+      customizationPreviewReady: true,
+    });
+
+    expect(withoutPreview).not.toContain("PREVISUALIZACIÓN");
+    expect(withoutPreview).not.toContain("archivo PNG");
+    expect(withPreview).toContain("Previsualización lista: Sí");
+    expect(withPreview).toContain("debo descargar y adjuntar manualmente el archivo PNG");
+  });
 });

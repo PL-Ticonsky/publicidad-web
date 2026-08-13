@@ -9,6 +9,7 @@ function valueOrFallback(value: string, fallback = "No indicado"): string {
 export interface WhatsAppQuote {
   contact: QuoteContact;
   result: QuoteResult;
+  customizationPreviewReady?: boolean;
 }
 
 export function buildWhatsAppMessage(quote: WhatsAppQuote): string {
@@ -25,6 +26,15 @@ export function buildWhatsAppMessage(quote: WhatsAppQuote): string {
   if (result.status === "requiresQuote") {
     priceLines.push("No se muestra un total hasta validar los importes pendientes.");
   }
+
+  const customizationLines = quote.customizationPreviewReady
+    ? [
+        "",
+        "PREVISUALIZACIÓN",
+        "Previsualización lista: Sí",
+        "Creé una previsualización y debo descargar y adjuntar manualmente el archivo PNG en esta conversación.",
+      ]
+    : [];
 
   return [
     "Hola, deseo enviar una solicitud estimada.",
@@ -48,6 +58,7 @@ export function buildWhatsAppMessage(quote: WhatsAppQuote): string {
     "COMENTARIOS",
     valueOrFallback(contact.comments, "Sin comentarios"),
     `Observaciones del diseño: ${valueOrFallback(contact.designNotes, "Sin observaciones")}`,
+    ...customizationLines,
     "",
     "Esta es una solicitud estimada, no una cotización formal. Los valores pueden variar tras la validación comercial.",
   ].join("\n");

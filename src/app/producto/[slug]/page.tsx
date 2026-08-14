@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { getAdditionalsByIds } from "@/data/additionals";
 import { getCategoryById } from "@/data/categories";
+import { isCustomizerProductSupported } from "@/data/customizer/supported-products";
 import { getAllActiveProducts, getProductBySlug } from "@/data/products";
 import { getTechniquesByIds } from "@/data/techniques";
 import { assertCatalogIntegrity } from "@/data/validate-catalog";
@@ -38,6 +39,7 @@ export default async function ProductPage({ params }: PageProps<"/producto/[slug
   const category = getCategoryById(product.categoryId);
   const techniques = getTechniquesByIds(product.availableTechniqueIds);
   const additionals = getAdditionalsByIds(product.availableAdditionalIds);
+  const supportsCustomizer = isCustomizerProductSupported(product.slug);
   const lowestPrice = product.priceTiers.length
     ? Math.min(...product.priceTiers.map((tier) => tier.unitPrice))
     : null;
@@ -105,9 +107,16 @@ export default async function ProductPage({ params }: PageProps<"/producto/[slug
               </p>
             ) : null}
 
-            <ButtonLink href={`/cotizador?producto=${product.slug}`} className="mt-8 min-h-14 w-full">
-              Configurar cotización aproximada
-            </ButtonLink>
+            <div className={`mt-8 grid gap-3 ${supportsCustomizer ? "sm:grid-cols-2" : ""}`}>
+              {supportsCustomizer ? (
+                <ButtonLink href={`/producto/${product.slug}/personalizar`} className="min-h-14 w-full">
+                  Abrir personalizador
+                </ButtonLink>
+              ) : null}
+              <ButtonLink href={`/cotizador?producto=${product.slug}`} variant={supportsCustomizer ? "outline" : "primary"} className="min-h-14 w-full">
+                Configurar cotización aproximada
+              </ButtonLink>
+            </div>
             <p className="mt-4 text-xs leading-5 text-[var(--muted)]">
               El valor final puede variar según el diseño, técnica de personalización, materiales, disponibilidad, urgencia y condiciones de entrega.
             </p>

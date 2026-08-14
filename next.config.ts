@@ -22,6 +22,9 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    useTypeScriptCli: false,
+  },
   async headers() {
     return [
       {

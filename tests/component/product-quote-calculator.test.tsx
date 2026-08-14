@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProductQuoteCalculator } from "@/components/product-quote-calculator";
+import { CustomizerPreviewProvider } from "@/components/personalization/customizer-preview-provider";
 import { calculateQuote } from "@/lib/quotation/calculate-quote";
 import { presentQuote } from "@/lib/quotation/present-quote";
 import { productFixture } from "../fixtures/quotation";
@@ -20,13 +21,21 @@ async function completeRequiredFields() {
   return user;
 }
 
+function renderCalculator() {
+  return render(
+    <CustomizerPreviewProvider>
+      <ProductQuoteCalculator product={product} />
+    </CustomizerPreviewProvider>,
+  );
+}
+
 describe("ProductQuoteCalculator", () => {
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", "573001234567");
   });
 
   it("mantiene el desglose completo en el DOM móvil y aclara el precio desde", () => {
-    render(<ProductQuoteCalculator product={product} />);
+    renderCalculator();
     const summary = screen.getByRole("region", { name: "Desglose de la solicitud" });
     expect(summary).toBeVisible();
     expect(summary).not.toHaveClass("hidden");
@@ -35,7 +44,7 @@ describe("ProductQuoteCalculator", () => {
   });
 
   it("muestra errores para espacios, teléfono y email inválidos", async () => {
-    render(<ProductQuoteCalculator product={product} />);
+    renderCalculator();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("Nombre *"), "   ");
     await user.tab();
@@ -52,7 +61,7 @@ describe("ProductQuoteCalculator", () => {
   });
 
   it("expone límites de longitud y cantidad en los controles", () => {
-    render(<ProductQuoteCalculator product={product} />);
+    renderCalculator();
     expect(screen.getByLabelText("Cantidad")).toHaveAttribute("maxlength", "6");
     expect(screen.getByLabelText("Nombre *")).toHaveAttribute("maxlength", "80");
     expect(screen.getByLabelText("Ciudad *")).toHaveAttribute("maxlength", "80");
@@ -62,7 +71,7 @@ describe("ProductQuoteCalculator", () => {
   });
 
   it("dos submits rápidos producen exactamente una intención de apertura", async () => {
-    render(<ProductQuoteCalculator product={product} />);
+    renderCalculator();
     await completeRequiredFields();
     const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
     const form = screen.getByRole("region", { name: "Desglose de la solicitud" }).closest("form");
@@ -77,7 +86,7 @@ describe("ProductQuoteCalculator", () => {
   });
 
   it("la UI y el mensaje interceptado usan la misma estimación parcial", async () => {
-    render(<ProductQuoteCalculator product={product} />);
+    renderCalculator();
     const user = await completeRequiredFields();
     await user.click(screen.getByRole("checkbox", { name: /Diseño básico/ }));
     await user.click(screen.getByRole("checkbox", { name: /Entrega urgente/ }));

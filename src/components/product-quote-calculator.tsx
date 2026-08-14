@@ -3,6 +3,7 @@
 import { type FormEvent, useMemo, useRef, useState } from "react";
 
 import { ProductImage } from "@/components/product-image";
+import { useCustomizerPreview } from "@/components/personalization/customizer-preview-provider";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/form-controls";
 import { ShieldIcon, WhatsAppIcon } from "@/components/ui/icons";
@@ -37,6 +38,8 @@ const initialContact: QuoteContact = {
 };
 
 export function ProductQuoteCalculator({ product }: { product: Product }) {
+  const { preview, downloaded, downloadPreviewOnce } = useCustomizerPreview();
+  const customizerPreview = preview?.productSlug === product.slug ? preview : null;
   const techniques = useMemo(() => getTechniquesByIds(product.availableTechniqueIds), [product.availableTechniqueIds]);
   const additionals = useMemo(() => getAdditionalsByIds(product.availableAdditionalIds), [product.availableAdditionalIds]);
   const defaultTechnique = techniques.find((technique) => technique.default) ?? techniques[0];
@@ -125,7 +128,11 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
     }
 
     const normalizedContact = normalizeContact(contact);
-    const message = buildWhatsAppMessage({ contact: normalizedContact, result: calculation.result });
+    const message = buildWhatsAppMessage({
+      contact: normalizedContact,
+      result: calculation.result,
+      customizationPreviewReady: Boolean(customizerPreview),
+    });
     const url = buildWhatsAppUrl(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER, message);
     if (!url) {
       setFormError("El canal de WhatsApp no tiene una configuración internacional válida.");
@@ -145,6 +152,18 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
     trackCommerceEvent("quote_completed", { product_id: product.id, estimate_status: calculation.result.status });
     trackCommerceEvent("whatsapp_click", { product_id: product.id });
     window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function downloadCustomizerPreview() {
+    const downloadablePreview = downloadPreviewOnce(product.slug);
+    if (!downloadablePreview) return;
+
+    const link = document.createElement("a");
+    link.href = downloadablePreview.previewObjectUrl;
+    link.download = `${product.slug}-previsualizacion.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
   }
 
   const result = calculation.result;
@@ -253,20 +272,34 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
       </section>
 
       <section className="space-y-8 border-t border-[var(--line-soft)] py-8 lg:col-start-1">
-        <div className="grid gap-5 bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
-          <div>
-            <h2 className="font-technical text-xs uppercase tracking-[.08em]">Archivo o referencia gráfica</h2>
-            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">El archivo permanece solo en este dispositivo. WhatsApp no permite adjuntarlo automáticamente; deberás enviarlo en la conversación.</p>
-            {artwork ? <p className="font-technical mt-2 text-xs uppercase text-[var(--signal)]">Seleccionado localmente: {artwork.name}</p> : null}
+        {customizerPreview ? (
+          <div className="grid gap-5 border border-[var(--signal)] bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center" aria-label="Previsualización personalizada">
+            <div>
+              <p className="eyebrow">Previsualización lista</p>
+              <h2 className="mt-2 text-xl">PNG preparado en este navegador</h2>
+              <p className="mt-2 break-all text-sm text-[var(--muted)]">{customizerPreview.sourceFileName}</p>
+              <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Descarga el PNG una vez y adjúntalo manualmente en WhatsApp. El archivo no se envía automáticamente ni se conserva al recargar.</p>
+            </div>
+            <Button type="button" onClick={downloadCustomizerPreview} disabled={downloaded} className="min-h-12 w-full sm:w-auto">
+              {downloaded ? "PNG descargado" : "Descargar PNG"}
+            </Button>
           </div>
-          <div className="flex gap-2">
-            <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--ink)] px-4 text-xs uppercase text-[var(--paper)]">
-              <input type="file" className="sr-only" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" onChange={(event) => { resetOpeningAttempt(); setArtwork(event.target.files?.[0] ?? null); }} />
-              {artwork ? "Reemplazar archivo" : "Seleccionar archivo"}
-            </label>
-            {artwork ? <button type="button" onClick={() => { resetOpeningAttempt(); setArtwork(null); }} className="font-technical min-h-11 border border-[var(--ink)] px-3 text-xs uppercase">Quitar</button> : null}
+        ) : (
+          <div className="grid gap-5 bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div>
+              <h2 className="font-technical text-xs uppercase tracking-[.08em]">Archivo o referencia gráfica</h2>
+              <p className="mt-2 text-xs leading-5 text-[var(--muted)]">El archivo permanece solo en este dispositivo. WhatsApp no permite adjuntarlo automáticamente; deberás enviarlo en la conversación.</p>
+              {artwork ? <p className="font-technical mt-2 text-xs uppercase text-[var(--signal)]">Seleccionado localmente: {artwork.name}</p> : null}
+            </div>
+            <div className="flex gap-2">
+              <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--ink)] px-4 text-xs uppercase text-[var(--paper)]">
+                <input type="file" className="sr-only" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" onChange={(event) => { resetOpeningAttempt(); setArtwork(event.target.files?.[0] ?? null); }} />
+                {artwork ? "Reemplazar archivo" : "Seleccionar archivo"}
+              </label>
+              {artwork ? <button type="button" onClick={() => { resetOpeningAttempt(); setArtwork(null); }} className="font-technical min-h-11 border border-[var(--ink)] px-3 text-xs uppercase">Quitar</button> : null}
+            </div>
           </div>
-        </div>
+        )}
         <ContactTextarea id="designNotes" label="Observaciones del diseño" value={contact.designNotes} error={fieldErrors.designNotes} maxLength={CONTACT_LIMITS.designNotes} onChange={(value) => updateContact("designNotes", value)} onBlur={() => validateField("designNotes")} placeholder="Color, ubicación del logo, número de tintas u otras instrucciones." />
         <ContactTextarea id="comments" label="Comentarios" value={contact.comments} error={fieldErrors.comments} maxLength={CONTACT_LIMITS.comments} onChange={(value) => updateContact("comments", value)} onBlur={() => validateField("comments")} placeholder="Fecha requerida, empaque, entrega u otra información comercial." />
       </section>

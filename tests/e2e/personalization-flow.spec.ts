@@ -23,6 +23,8 @@ test.beforeEach(async ({ context, page }) => {
 
 for (const product of [
   { slug: "llavero-metalico-redondo", name: "Llavero metálico redondo" },
+  { slug: "llavero-acrilico-personalizado", name: "Llavero acrílico personalizado" },
+  { slug: "llavero-destapador-corporativo", name: "Llavero destapador corporativo" },
   { slug: "mouse-pad-personalizado-rectangular", name: "Mouse Pad personalizado rectangular" },
 ]) {
   test(`${product.name} expone el acceso y continúa seguro sin PNG`, async ({ page }) => {

@@ -230,8 +230,14 @@ describe("CustomizerWorkspace", () => {
 
   it("disables stale downloads until the current PNG is ready", async () => {
     const user = userEvent.setup();
+    const onPreviewChange = vi.fn();
     mocks.decode.mockResolvedValue(decodedImage());
-    render(<CustomizerWorkspace template={template} />);
+    render(
+      <CustomizerWorkspace
+        template={template}
+        onPreviewChange={onPreviewChange}
+      />,
+    );
 
     await user.upload(
       screen.getByLabelText("Imagen PNG, JPEG o WebP"),
@@ -252,10 +258,14 @@ describe("CustomizerWorkspace", () => {
     expect(
       screen.getByRole("button", { name: "Preparando PNG…" }),
     ).toBeDisabled();
+    expect(onPreviewChange).toHaveBeenLastCalledWith(null);
     act(() => finishPng(new Blob(["current"], { type: "image/png" })));
     expect(
       await screen.findByRole("button", { name: "Descargar PNG" }),
     ).toBeEnabled();
+    expect(onPreviewChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ previewObjectUrl: "blob:preview-2" }),
+    );
   });
 
   it("ignores PNG callbacks that finish after image removal", async () => {

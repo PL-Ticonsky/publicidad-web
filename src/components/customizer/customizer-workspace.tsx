@@ -281,7 +281,7 @@ export function CustomizerWorkspace({
   const updateTransform = (
     update: (current: CustomizerTransform) => CustomizerTransform,
   ) => {
-    setPreviewIsCurrent(false);
+    releasePreview();
     setExportError(null);
     setTransform((current) =>
       clampCustomizerTransform(update(current), template.printArea),

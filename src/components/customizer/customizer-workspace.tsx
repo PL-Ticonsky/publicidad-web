@@ -89,6 +89,7 @@ export function CustomizerWorkspace({
   const renderRevisionRef = useRef(0);
   const dragRef = useRef<DragState | null>(null);
   const currentImageRef = useRef<DecodedCustomizerImage | null>(null);
+  const retiredImagesRef = useRef<DecodedCustomizerImage[]>([]);
   const currentPreviewRef = useRef<CustomizerPreview | null>(null);
 
   const [fileState, setFileState] = useState<FileState>({ status: "empty" });
@@ -97,6 +98,7 @@ export function CustomizerWorkspace({
     ...INITIAL_CUSTOMIZER_TRANSFORM,
   });
   const [preview, setPreview] = useState<CustomizerPreview | null>(null);
+  const [previewIsCurrent, setPreviewIsCurrent] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -111,13 +113,21 @@ export function CustomizerWorkspace({
       currentPreviewRef.current = null;
     }
     setPreview(null);
+    setPreviewIsCurrent(false);
     if (notify) callbackRef.current?.(null);
   }, []);
 
-  const releaseImage = useCallback(() => {
-    currentImageRef.current?.dispose();
+  const retireCurrentImage = useCallback(() => {
+    if (currentImageRef.current) {
+      retiredImagesRef.current.push(currentImageRef.current);
+    }
     currentImageRef.current = null;
   }, []);
+
+  useEffect(() => {
+    const retiredImages = retiredImagesRef.current.splice(0);
+    for (const image of retiredImages) image.dispose();
+  }, [fileState]);
 
   useEffect(() => {
     let active = true;
@@ -149,9 +159,13 @@ export function CustomizerWorkspace({
   }, [template]);
 
   useEffect(() => {
+    const retiredImages = retiredImagesRef.current;
     return () => {
       imageRevisionRef.current += 1;
-      releaseImage();
+      currentImageRef.current?.dispose();
+      currentImageRef.current = null;
+      const imagesToDispose = retiredImages.splice(0);
+      for (const image of imagesToDispose) image.dispose();
       renderRevisionRef.current += 1;
       const currentPreview = currentPreviewRef.current;
       if (currentPreview) {
@@ -160,7 +174,7 @@ export function CustomizerWorkspace({
       }
       callbackRef.current?.(null);
     };
-  }, [releaseImage]);
+  }, []);
 
   useEffect(() => {
     if (layerState.status !== "ready") return;
@@ -174,6 +188,7 @@ export function CustomizerWorkspace({
     }
 
     const revision = ++renderRevisionRef.current;
+    const imageRevision = imageRevisionRef.current;
     renderCustomizerPreview(
       context,
       template,
@@ -183,8 +198,14 @@ export function CustomizerWorkspace({
     );
 
     canvas.toBlob((blob) => {
-      if (revision !== renderRevisionRef.current) return;
+      if (
+        revision !== renderRevisionRef.current ||
+        imageRevision !== imageRevisionRef.current
+      ) {
+        return;
+      }
       if (!blob) {
+        releasePreview();
         setExportError(
           "No fue posible generar el PNG. Inténtalo de nuevo en un navegador actualizado.",
         );
@@ -203,14 +224,15 @@ export function CustomizerWorkspace({
       const previousPreview = currentPreviewRef.current;
       currentPreviewRef.current = nextPreview;
       setPreview(nextPreview);
+      setPreviewIsCurrent(true);
       if (previousPreview) URL.revokeObjectURL(previousPreview.previewObjectUrl);
       callbackRef.current?.(nextPreview);
     }, "image/png");
-  }, [fileState, layerState, template, transform]);
+  }, [fileState, layerState, releasePreview, template, transform]);
 
   const selectFile = async (file: File) => {
     const revision = ++imageRevisionRef.current;
-    releaseImage();
+    retireCurrentImage();
     releasePreview();
     setTransform({ ...INITIAL_CUSTOMIZER_TRANSFORM });
     setExportError(null);
@@ -248,7 +270,7 @@ export function CustomizerWorkspace({
 
   const removeImage = () => {
     imageRevisionRef.current += 1;
-    releaseImage();
+    retireCurrentImage();
     releasePreview();
     setTransform({ ...INITIAL_CUSTOMIZER_TRANSFORM });
     setExportError(null);
@@ -259,6 +281,8 @@ export function CustomizerWorkspace({
   const updateTransform = (
     update: (current: CustomizerTransform) => CustomizerTransform,
   ) => {
+    setPreviewIsCurrent(false);
+    setExportError(null);
     setTransform((current) =>
       clampCustomizerTransform(update(current), template.printArea),
     );
@@ -273,7 +297,15 @@ export function CustomizerWorkspace({
   };
 
   const resetTransform = () => {
-    setTransform({ ...INITIAL_CUSTOMIZER_TRANSFORM });
+    updateTransform(() => ({ ...INITIAL_CUSTOMIZER_TRANSFORM }));
+  };
+
+  const centerDesign = () => {
+    updateTransform((current) => ({
+      ...current,
+      offsetX: 0,
+      offsetY: 0,
+    }));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
@@ -326,7 +358,7 @@ export function CustomizerWorkspace({
   };
 
   const downloadPreview = () => {
-    if (!preview) return;
+    if (!preview || !previewIsCurrent) return;
     const link = document.createElement("a");
     link.href = preview.previewObjectUrl;
     link.download = downloadFileName(preview.sourceFileName);
@@ -432,6 +464,12 @@ export function CustomizerWorkspace({
               className="mt-2 block min-h-12 w-full min-w-0 border border-[var(--line)] bg-white p-2 text-sm file:mr-3 file:min-h-9 file:border-0 file:bg-[var(--ink)] file:px-3 file:text-xs file:font-semibold file:uppercase file:text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--signal)] disabled:opacity-60"
             />
             <p className="mt-2 text-xs text-[var(--muted)]">Máximo 10 MiB y 25 megapíxeles. SVG no permitido.</p>
+            {fileState.status === "ready" ? (
+              <p className="mt-2 min-w-0 text-xs text-[var(--muted)]">
+                <span className="font-semibold text-[var(--ink)]">Archivo actual:</span>{" "}
+                <span className="break-all">{fileState.fileName}</span>
+              </p>
+            ) : null}
           </div>
 
           <div
@@ -492,18 +530,21 @@ export function CustomizerWorkspace({
                 <Button type="button" variant="outline" aria-label="Mover imagen arriba" onClick={() => moveDesign(0, -MOVEMENT_STEP)}>↑</Button>
                 <span />
                 <Button type="button" variant="outline" aria-label="Mover imagen a la izquierda" onClick={() => moveDesign(-MOVEMENT_STEP, 0)}>←</Button>
-                <Button type="button" variant="outline" aria-label="Centrar y restablecer imagen" onClick={resetTransform}>●</Button>
+                <Button type="button" variant="outline" aria-label="Centrar imagen" onClick={centerDesign}>●</Button>
                 <Button type="button" variant="outline" aria-label="Mover imagen a la derecha" onClick={() => moveDesign(MOVEMENT_STEP, 0)}>→</Button>
                 <span />
                 <Button type="button" variant="outline" aria-label="Mover imagen abajo" onClick={() => moveDesign(0, MOVEMENT_STEP)}>↓</Button>
                 <span />
               </div>
+              <Button type="button" variant="outline" className="mt-2 w-full" onClick={resetTransform}>
+                Restablecer ajustes
+              </Button>
             </div>
           </fieldset>
 
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            <Button type="button" variant="secondary" disabled={!preview} onClick={downloadPreview}>
-              Descargar PNG
+            <Button type="button" variant="secondary" disabled={!preview || !previewIsCurrent} onClick={downloadPreview}>
+              {ready && !previewIsCurrent ? "Preparando PNG…" : "Descargar PNG"}
             </Button>
             <Button type="button" variant="outline" disabled={!ready && fileState.status !== "invalid" && fileState.status !== "error"} onClick={removeImage}>
               Eliminar imagen

@@ -7,13 +7,13 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--paper);
+  background: var(--pp-paper);
   padding:
     max(1.5rem, env(safe-area-inset-top))
     max(1.5rem, env(safe-area-inset-right))
     max(1.5rem, env(safe-area-inset-bottom))
     max(1.5rem, env(safe-area-inset-left));
-  animation: promotion-fade-in 480ms ease-out both;
+  animation: none;
 }
 
 .close {
@@ -25,9 +25,9 @@
   width: 3rem;
   height: 3rem;
   place-items: center;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
+  border: 1px solid var(--pp-navy);
+  background: var(--pp-paper);
+  color: var(--pp-navy);
   font-family: var(--font-body), sans-serif;
   font-size: 1.75rem;
   line-height: 1;
@@ -35,12 +35,12 @@
 }
 
 .close:hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--pp-navy);
+  color: var(--pp-paper);
 }
 
 .close:focus-visible {
-  outline: 3px solid var(--signal);
+  outline: 2px solid var(--pp-cyan);
   outline-offset: 3px;
 }
 
@@ -63,10 +63,10 @@
   display: inline-flex;
   min-height: 1.75rem;
   align-items: center;
-  background: var(--signal);
+  background: var(--pp-cyan);
   padding-inline: .7rem;
   color: white;
-  font-family: var(--font-mono-technical), monospace;
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   font-size: .65rem;
   font-weight: 600;
   letter-spacing: .1em;
@@ -76,11 +76,12 @@
 
 .title {
   margin-top: clamp(1.5rem, 3vh, 2.5rem);
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   font-size: clamp(4.4rem, 6.6vw, 7.5rem);
-  font-weight: 700;
-  letter-spacing: -.045em;
-  line-height: .86;
+  font-weight: 400;
+  letter-spacing: var(--pp-tracking-display);
+  line-height: var(--pp-leading-display);
+  text-transform: uppercase;
 }
 
 .titleMain,
@@ -89,22 +90,22 @@
 }
 
 .titleMain {
-  color: var(--ink);
+  color: var(--pp-navy);
   animation: promotion-rise-in 520ms 110ms ease-out both;
 }
 
 .titleAccent {
   margin-top: .12em;
-  color: var(--signal);
-  font-style: italic;
-  font-weight: 600;
+  color: var(--pp-cyan);
+  font-style: normal;
+  font-weight: 400;
   animation: promotion-rise-in 520ms 180ms ease-out both;
 }
 
 .support {
   max-width: 36rem;
   margin-top: clamp(1.5rem, 3vh, 2.25rem);
-  color: var(--muted);
+  color: var(--pp-navy-700);
   font-size: clamp(1rem, 1.25vw, 1.2rem);
   line-height: 1.7;
   animation: promotion-rise-in 480ms 240ms ease-out both;
@@ -117,25 +118,25 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  border-block: 1px solid var(--line);
+  border-block: 1px solid var(--pp-line);
   padding-block: .9rem;
   animation: promotion-rise-in 480ms 290ms ease-out both;
 }
 
 .couponLabel,
 .couponCode {
-  font-family: var(--font-mono-technical), monospace;
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   text-transform: uppercase;
 }
 
 .couponLabel {
-  color: var(--muted);
+  color: var(--pp-navy-700);
   font-size: .62rem;
   letter-spacing: .1em;
 }
 
 .couponCode {
-  color: var(--ink);
+  color: var(--pp-navy);
   font-size: clamp(1.15rem, 2vw, 1.5rem);
   letter-spacing: .18em;
 }
@@ -151,8 +152,8 @@
 .continue {
   margin-top: 1rem;
   min-height: 2.75rem;
-  color: var(--muted);
-  font-family: var(--font-mono-technical), monospace;
+  color: var(--pp-navy-700);
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   font-size: .65rem;
   letter-spacing: .08em;
   text-decoration: underline;
@@ -163,11 +164,11 @@
 }
 
 .continue:hover {
-  color: var(--signal);
+  color: var(--pp-cyan);
 }
 
 .continue:focus-visible {
-  outline: 3px solid var(--signal);
+  outline: 2px solid var(--pp-cyan);
   outline-offset: 3px;
 }
 
@@ -181,8 +182,8 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--stone-high);
+  border: 1px solid var(--pp-line);
+  background: var(--pp-paper-cool);
 }
 
 .image {
@@ -194,8 +195,8 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  color: var(--muted);
-  font-family: var(--font-mono-technical), monospace;
+  color: var(--pp-navy-700);
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   font-size: .58rem;
   letter-spacing: .06em;
   text-transform: uppercase;

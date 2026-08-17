@@ -67,7 +67,7 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
 
       <div
         id="product-main-image"
-        className={`product-gallery__viewport relative order-1 aspect-[4/3] w-full overflow-hidden border border-[var(--line)] bg-[var(--surface)] ${hasMultipleImages ? "sm:order-2" : ""}`}
+        className={`product-gallery__viewport halftone relative order-1 aspect-[5/4] w-full overflow-hidden rounded-[var(--pp-radius)] border border-[var(--pp-line)] bg-[var(--pp-paper-cool)] ${hasMultipleImages ? "sm:order-2" : ""}`}
         onPointerEnter={updateZoomOrigin}
         onPointerMove={updateZoomOrigin}
         onPointerLeave={resetZoomOrigin}
@@ -80,7 +80,7 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
           alt={image?.alt ?? name}
           preload
           sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1023px) calc(100vw - 3rem), (max-width: 1365px) 57vw, 738px"
-          className="product-gallery__image object-contain"
+          className="product-gallery__image object-contain p-[5%]"
         />
       </div>
     </div>

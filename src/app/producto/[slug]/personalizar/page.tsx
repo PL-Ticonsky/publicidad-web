@@ -31,8 +31,8 @@ export default async function PersonalizeProductPage({ params }: PageProps<"/pro
 
   if (!isCustomizerProductSupported(product.slug)) {
     return (
-      <main className="page-container min-h-[70vh] py-12">
-        <section className="mx-auto max-w-3xl border border-[var(--ink)] bg-white p-6 sm:p-10" aria-labelledby="unsupported-title">
+      <main className="page-container min-h-[70vh] py-[var(--pp-section-y)]">
+        <section className="mx-auto max-w-3xl border-y border-[var(--pp-line)] bg-white py-10" aria-labelledby="unsupported-title">
           <p className="eyebrow">Previsualización no disponible</p>
           <h1 id="unsupported-title" className="mt-4 text-4xl sm:text-5xl">Este producto no admite personalización visual</h1>
           <p className="mt-5 leading-7 text-[var(--muted)]">

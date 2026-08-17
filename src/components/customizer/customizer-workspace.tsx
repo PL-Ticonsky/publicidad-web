@@ -385,12 +385,12 @@ export function CustomizerWorkspace({
   return (
     <section
       aria-labelledby={`${componentId}-title`}
-      className="min-w-0 border border-[var(--line-soft)] bg-white p-4 sm:p-6"
+      className="min-w-0 bg-white py-2"
     >
-      <div className="flex flex-col gap-3 border-b border-[var(--line-soft)] pb-5 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-[var(--pp-line)] pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="eyebrow">Previsualización orientativa</p>
-          <h2 id={`${componentId}-title`} className="mt-2 text-2xl">
+          <h2 id={`${componentId}-title`} className="mt-3 text-3xl">
             Personaliza {template.productName}
           </h2>
         </div>
@@ -408,7 +408,7 @@ export function CustomizerWorkspace({
       <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,.65fr)]">
         <div className="min-w-0">
           <div
-            className="relative w-full overflow-hidden border border-[var(--line)] bg-[var(--stone)]"
+            className="relative w-full overflow-hidden border border-[var(--pp-line)] bg-[var(--pp-paper-cool)]"
             style={{ aspectRatio: `${template.canvas.width} / ${template.canvas.height}` }}
           >
             <canvas
@@ -430,7 +430,7 @@ export function CustomizerWorkspace({
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute border-2 border-dashed border-[var(--signal)] shadow-[0_0_0_1px_rgba(255,255,255,.85)]"
+              className="pointer-events-none absolute border-2 border-dashed border-[var(--pp-cyan)] shadow-[0_0_0_1px_rgba(255,255,255,.85)]"
               style={printAreaStyle}
             />
             {!ready ? (
@@ -461,7 +461,7 @@ export function CustomizerWorkspace({
               accept="image/png,image/jpeg,image/webp"
               onChange={handleFileChange}
               disabled={fileState.status === "processing"}
-              className="mt-2 block min-h-12 w-full min-w-0 border border-[var(--line)] bg-white p-2 text-sm file:mr-3 file:min-h-9 file:border-0 file:bg-[var(--ink)] file:px-3 file:text-xs file:font-semibold file:uppercase file:text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--signal)] disabled:opacity-60"
+              className="mt-2 block min-h-12 w-full min-w-0 border border-[var(--pp-line)] bg-[var(--pp-paper-cool)] p-2 text-sm file:mr-3 file:min-h-9 file:border-0 file:bg-[var(--pp-navy)] file:px-3 file:text-xs file:uppercase file:text-white disabled:opacity-60"
             />
             <p className="mt-2 text-xs text-[var(--muted)]">Máximo 10 MiB y 25 megapíxeles. SVG no permitido.</p>
             {fileState.status === "ready" ? (
@@ -475,7 +475,7 @@ export function CustomizerWorkspace({
           <div
             role={statusIsError ? "alert" : "status"}
             aria-live={statusIsError ? "assertive" : "polite"}
-            className={`border-l-3 px-3 py-2 text-sm ${statusIsError ? "border-[var(--error)] bg-[var(--error-surface)] text-[var(--error)]" : "border-[var(--line)] bg-[var(--stone)] text-[var(--muted)]"}`}
+            className={`border-l-3 px-3 py-2 text-sm ${statusIsError ? "border-[var(--error)] bg-[var(--error-surface)] text-[var(--error)]" : "border-[var(--pp-cyan)] bg-[var(--pp-paper-tint)] text-[var(--pp-navy-700)]"}`}
           >
             {layerState.status === "error"
               ? layerState.message
@@ -500,7 +500,7 @@ export function CustomizerWorkspace({
                   const zoom = Number(event.target.value) / 100;
                   updateTransform((current) => ({ ...current, zoom }));
                 }}
-                className="mt-2 min-h-11 w-full accent-[var(--signal)]"
+                className="mt-2 min-h-11 w-full accent-[var(--pp-cyan)]"
               />
             </div>
             <div>
@@ -519,7 +519,7 @@ export function CustomizerWorkspace({
                   const rotationDegrees = Number(event.target.value);
                   updateTransform((current) => ({ ...current, rotationDegrees }));
                 }}
-                className="mt-2 min-h-11 w-full accent-[var(--signal)]"
+                className="mt-2 min-h-11 w-full accent-[var(--pp-cyan)]"
               />
             </div>
 

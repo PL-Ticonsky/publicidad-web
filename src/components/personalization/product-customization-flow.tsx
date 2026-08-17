@@ -28,14 +28,14 @@ export function ProductCustomizationFlow({ product, previewAvailable }: { produc
 
   return (
     <main className="min-h-screen">
-      <div className="page-container py-8 sm:py-12">
-        <Link href={`/producto/${product.slug}`} className="font-technical inline-flex min-h-11 items-center text-xs uppercase underline underline-offset-4">
+      <div className="page-container pb-[var(--pp-section-y)] pt-8 sm:pt-12">
+        <Link href={`/producto/${product.slug}`} className="font-technical inline-flex min-h-11 items-center text-xs uppercase text-[var(--pp-cyan)]">
           ← Volver al producto
         </Link>
 
-        <header className="mt-4 border-t border-[var(--ink)] py-7">
+        <header className="mt-4 border-t-4 border-[var(--pp-navy)] py-8">
           <p className="eyebrow">Paso 1 de 2 / previsualización local</p>
-          <h1 className="mt-4 max-w-4xl break-words text-[clamp(2.1rem,6vw,4.5rem)] leading-[.98]">
+          <h1 className="mt-4 max-w-5xl break-words text-[clamp(3rem,7vw,6rem)] leading-[.9]">
             {previewAvailable ? `Personaliza ${product.name}` : `Previsualización para ${product.name}`}
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-6 text-[var(--muted)]">
@@ -46,8 +46,8 @@ export function ProductCustomizationFlow({ product, previewAvailable }: { produc
         </header>
 
         <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(15rem,.35fr)_minmax(0,1fr)] lg:items-start">
-          <aside className="min-w-0 border border-[var(--ink)] bg-[var(--stone-low)] p-4 lg:sticky lg:top-24" aria-label="Producto seleccionado">
-            <div className="relative aspect-[4/3] overflow-hidden border border-[var(--line)] bg-white">
+          <aside className="min-w-0 bg-[var(--pp-paper-cool)] p-4 lg:sticky lg:top-24" aria-label="Producto seleccionado">
+            <div className="halftone relative aspect-[5/4] overflow-hidden border border-[var(--pp-line)] bg-white">
               <ProductImage
                 src={primaryImage?.src ?? null}
                 alt={primaryImage?.alt ?? product.name}
@@ -64,19 +64,19 @@ export function ProductCustomizationFlow({ product, previewAvailable }: { produc
           </div>
         </div>
 
-        <section className="mt-6 border border-[var(--ink)] bg-white p-5 sm:p-7" aria-labelledby="continue-title">
+        <section className="mt-6 bg-[var(--pp-navy)] p-5 text-white sm:p-7" aria-labelledby="continue-title">
           <p className="eyebrow">Paso 2 de 2 / confirmar</p>
           <div className="mt-3 grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
-              <h2 id="continue-title" className="text-2xl">
+              <h2 id="continue-title" className="text-3xl text-white">
                 {preview ? "Previsualización lista" : "Continúa cuando estés listo"}
               </h2>
               {preview ? (
-                <p className="mt-2 break-all text-sm leading-6 text-[var(--muted)]" aria-live="polite">
+                <p className="mt-2 break-all text-sm leading-6 text-[var(--pp-cyan-pale)]" aria-live="polite">
                   {preview.sourceFileName} · {preview.width.toLocaleString("es-CO")} × {preview.height.toLocaleString("es-CO")} px. El PNG se conservará solo mientras esta pestaña permanezca abierta.
                 </p>
               ) : (
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]" aria-live="polite">
+                <p className="mt-2 text-sm leading-6 text-[var(--pp-cyan-pale)]" aria-live="polite">
                   La previsualización no es obligatoria. Puedes continuar al cotizador sin un PNG.
                 </p>
               )}

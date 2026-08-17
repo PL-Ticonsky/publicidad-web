@@ -26,7 +26,7 @@ export default async function CategoryCatalogPage({ params }: CategoryPageProps)
     <main className="min-h-screen">
       <header className="page-container pb-8 pt-10 sm:pb-12 sm:pt-16">
         <div className="flex flex-wrap items-end justify-between gap-7">
-          <div><p className="eyebrow">Catálogo / {category.name}</p><h1 className="mt-4 max-w-4xl [font-size:var(--pp-display-1)]">{category.title ?? `${category.name} personalizados`}</h1></div>
+          <div className="min-w-0"><p className="eyebrow">Catálogo / {category.name}</p><h1 className="mt-4 max-w-4xl break-words [font-size:var(--pp-display-1)]">{category.title ?? `${category.name} personalizados`}</h1></div>
           {category.description ? <p className="max-w-[34ch] text-base italic leading-7 text-[var(--pp-navy-700)]">{category.description}</p> : null}
         </div>
         <div className="mt-9"><CatalogNavigation activeSlug={category.slug} /></div>

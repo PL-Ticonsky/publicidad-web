@@ -17,7 +17,7 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
   if (!selectedProduct) {
     const products = getAllActiveProducts();
     return (
-      <main className="page-container min-h-[70vh] py-12">
+      <main className="page-container min-h-[70vh] py-[var(--pp-section-y)]">
         <EmptyState
           title={typeof producto === "string" ? "El producto no está disponible" : "Elige un producto para cotizar"}
           description="La cotización se configura por producto para aplicar correctamente sus cantidades, técnicas y precios."
@@ -37,11 +37,11 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
 
   return (
     <main className="min-h-screen">
-      <div className="page-container py-8 sm:py-12">
-        <Link href={`/producto/${selectedProduct.slug}`} className="font-technical inline-flex min-h-11 items-center text-[10px] uppercase underline underline-offset-4">
+      <div className="page-container pb-[var(--pp-section-y)] pt-8 sm:pt-12">
+        <Link href={`/producto/${selectedProduct.slug}`} className="font-technical inline-flex min-h-11 items-center text-xs uppercase text-[var(--pp-cyan)] hover:text-[var(--pp-cyan-700)]">
           ← Volver al producto
         </Link>
-        <section className="mt-4"><ProductQuoteCalculator product={selectedProduct} /></section>
+        <section className="mt-3"><ProductQuoteCalculator product={selectedProduct} /></section>
       </div>
     </main>
   );

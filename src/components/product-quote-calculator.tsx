@@ -173,29 +173,29 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
     : null;
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-x-6 pb-32 lg:grid-cols-[minmax(0,1fr)_340px] lg:pb-0" noValidate>
-      <header className="border-t border-[var(--ink)] py-8 lg:col-start-1">
+    <form onSubmit={handleSubmit} className="grid gap-x-8 pb-32 lg:grid-cols-[minmax(0,1fr)_360px] lg:pb-0" noValidate>
+      <header className="border-t-4 border-[var(--pp-navy)] py-8 lg:col-start-1">
         <p className="eyebrow">Solicitud estimada / borrador local</p>
-        <h1 className="mt-4 text-[clamp(2.5rem,5vw,3.5rem)] leading-none">Configuremos tu pedido</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+        <h1 className="mt-4 text-[clamp(3rem,6vw,5.25rem)] leading-[.9]">Configuremos<br /><span className="text-[var(--pp-cyan)]">tu pedido</span></h1>
+        <p className="mt-5 max-w-2xl text-sm leading-6 text-[var(--pp-navy-700)]">
           Define la cantidad, la personalización y los datos que quieres incluir. Nada se guarda: el resumen se prepara en tu navegador y se envía a WhatsApp.
         </p>
       </header>
 
-      <section className="relative border border-[var(--ink)] bg-[var(--stone-low)] p-5 lg:col-start-1 lg:p-7">
-        <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-4">
-          <h2 className="font-technical text-xs uppercase tracking-[.08em]">Resumen del producto</h2>
+      <section className="relative bg-[var(--pp-paper-cool)] p-5 lg:col-start-1 lg:p-7">
+        <div className="flex items-center justify-between border-b border-[var(--pp-line)] pb-4">
+          <h2 className="font-technical text-xs uppercase tracking-[var(--pp-tracking-label)]">Resumen del producto</h2>
           <span className="font-technical text-xs uppercase text-[var(--muted)]">{product.sku ? `Ref. ${product.sku}` : "Referencia sin SKU"}</span>
         </div>
         <div className="mt-5 grid gap-5 sm:grid-cols-[150px_1fr]">
-          <div className="relative aspect-[4/5] border border-[var(--line)] bg-white grayscale">
+          <div className="halftone relative aspect-[5/4] overflow-hidden border border-[var(--pp-line)] bg-white">
             <ProductImage src={primaryImage?.src ?? null} alt={primaryImage?.alt ?? product.name} sizes="150px" />
           </div>
           <div className="flex flex-col justify-center">
-            <h2 className="text-2xl leading-tight">{product.name}</h2>
-            <dl className="font-technical mt-5 grid grid-cols-2 gap-4 text-xs uppercase text-[var(--muted)]">
-              <div><dt>Pedido mínimo</dt><dd className="mt-1 text-[var(--ink)]">{product.minimumQuantity.toLocaleString("es-CO")} unidades</dd></div>
-              <div><dt>Precio base por unidad, desde</dt><dd className="mt-1 text-[var(--ink)]">{lowestBasePrice === null ? "Por validar" : formatCOP(lowestBasePrice)}</dd></div>
+            <h2 className="text-3xl leading-tight">{product.name}</h2>
+            <dl className="mt-5 grid grid-cols-2 gap-4 text-sm text-[var(--pp-navy-700)]">
+              <div><dt>Pedido mínimo</dt><dd className="font-display mt-1 text-xl text-[var(--pp-cyan)]">{product.minimumQuantity.toLocaleString("es-CO")} unidades</dd></div>
+              <div><dt>Precio base por unidad, desde</dt><dd className="font-display mt-1 text-xl text-[var(--pp-cyan)]">{lowestBasePrice === null ? "Por validar" : formatCOP(lowestBasePrice)}</dd></div>
             </dl>
             <p className="mt-3 text-xs leading-5 text-[var(--muted)]">“Desde” corresponde al tramo de mayor volumen; no incluye personalización, cargos fijos ni IVA.</p>
           </div>
@@ -203,14 +203,14 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
       </section>
 
       <section className="py-10 lg:col-start-1">
-        <div className="flex items-center gap-3 border-b border-[var(--line-soft)] pb-3">
-          <span className="font-technical text-xs text-[var(--signal)]">MÓDULO 02</span>
-          <h2 className="text-xl">Configuración técnica</h2>
+        <div className="flex items-baseline gap-3 border-b border-[var(--pp-line)] pb-3">
+          <span className="font-technical text-xs text-[var(--pp-cyan)]">02</span>
+          <h2 className="text-2xl">Configuración técnica</h2>
         </div>
 
         <label htmlFor="cantidad" className="mt-7 block text-sm font-bold">
           Cantidad
-          <span className="mt-2 grid grid-cols-[48px_1fr_48px] border border-[var(--line)] bg-[var(--surface)]">
+          <span className="mt-2 grid grid-cols-[48px_1fr_48px] border border-[var(--pp-line)] bg-[var(--pp-paper-cool)]">
             <button type="button" className="min-h-12 border-r border-[var(--line)] text-xl" onClick={() => setValidQuantity((Number.isSafeInteger(quantity) ? quantity : product.minimumQuantity) - 1)} aria-label="Reducir cantidad">−</button>
             <input id="cantidad" aria-label="Cantidad" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={MAX_QUANTITY_DIGITS} value={quantityInput} onChange={(event) => updateQuantity(event.target.value)} aria-invalid={Boolean(calculation.error)} aria-describedby="cantidad-ayuda cantidad-error" className="min-w-0 bg-transparent px-3 text-center font-semibold outline-none" required />
             <button type="button" className="min-h-12 border-l border-[var(--line)] text-xl" onClick={() => setValidQuantity((Number.isSafeInteger(quantity) ? quantity : product.minimumQuantity) + 1)} aria-label="Aumentar cantidad">+</button>
@@ -219,7 +219,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
           {calculation.error ? <span id="cantidad-error" className="mt-1 block text-xs font-semibold text-[var(--color-error)]">{calculation.error}</span> : null}
           <span className="mt-4 grid gap-2 sm:grid-cols-3">
             {product.priceTiers.map((tier) => (
-              <button key={tier.id} type="button" onClick={() => setValidQuantity(tier.minQuantity)} className={`font-technical flex min-h-14 items-center justify-between border px-3 text-xs uppercase ${result?.selectedTier?.id === tier.id ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] bg-[var(--surface)]"}`}>
+              <button key={tier.id} type="button" onClick={() => setValidQuantity(tier.minQuantity)} className={`font-technical relative flex min-h-14 items-center justify-between border px-3 text-xs uppercase transition-colors ${result?.selectedTier?.id === tier.id ? "border-[var(--pp-cyan)] text-[var(--pp-cyan)] after:absolute after:-inset-x-px after:-bottom-px after:h-1 after:bg-[var(--pp-cyan)]" : "border-[var(--pp-line)] bg-white hover:border-[var(--pp-cyan)]"}`}>
                 <span>{tier.minQuantity.toLocaleString("es-CO")}–{tier.maxQuantity?.toLocaleString("es-CO") ?? "+"}</span>
                 <span>{formatCOP(tier.unitPrice)}/u</span>
               </button>
@@ -233,7 +233,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
             <div className="mt-2 border-t border-[var(--line)]">
               {techniques.map((technique) => (
                 <label key={technique.id} className="flex cursor-pointer items-start gap-3 border-b border-[var(--line)] py-4">
-                  <input type="radio" name="tecnica" value={technique.id} checked={techniqueId === technique.id} onChange={(event) => { resetOpeningAttempt(); setTechniqueId(event.target.value); }} className="mt-1 h-4 w-4 accent-[var(--signal)]" />
+                  <input type="radio" name="tecnica" value={technique.id} checked={techniqueId === technique.id} onChange={(event) => { resetOpeningAttempt(); setTechniqueId(event.target.value); }} className="mt-1 h-4 w-4 accent-[var(--pp-cyan)]" />
                   <span className="flex-1">
                     <span className="block text-sm font-semibold">{technique.name}</span>
                     {technique.description ? <span className="mt-1 block text-xs text-[var(--muted)]">{technique.description}</span> : null}
@@ -255,7 +255,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
             <div className="mt-3">
               {additionals.map((additional) => (
                 <label key={additional.id} className="flex cursor-pointer items-start gap-3 border-b border-[var(--line)] py-4">
-                  <input type="checkbox" checked={additionalIds.includes(additional.id)} onChange={() => toggleAdditional(additional.id)} className="mt-1 h-5 w-5 accent-[var(--signal)]" />
+                  <input type="checkbox" checked={additionalIds.includes(additional.id)} onChange={() => toggleAdditional(additional.id)} className="mt-1 h-5 w-5 accent-[var(--pp-cyan)]" />
                   <span className="flex-1">
                     <span className="block text-sm font-bold">{additional.name}</span>
                     {additional.description ? <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{additional.description}</span> : null}
@@ -273,7 +273,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
       <section className="space-y-8 border-t border-[var(--line-soft)] py-8 lg:col-start-1">
         {customizerPreview ? (
-          <div className="grid gap-5 border border-[var(--signal)] bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center" aria-label="Previsualización personalizada">
+          <div className="grid gap-5 border border-[var(--pp-cyan)] bg-[var(--pp-paper-tint)] p-5 sm:grid-cols-[1fr_auto] sm:items-center" aria-label="Previsualización personalizada">
             <div>
               <p className="eyebrow">Previsualización lista</p>
               <h2 className="mt-2 text-xl">PNG preparado en este navegador</h2>
@@ -285,14 +285,14 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-5 bg-[var(--stone)] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="grid gap-5 bg-[var(--pp-paper-cool)] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
             <div>
               <h2 className="font-technical text-xs uppercase tracking-[.08em]">Archivo o referencia gráfica</h2>
               <p className="mt-2 text-xs leading-5 text-[var(--muted)]">El archivo permanece solo en este dispositivo. WhatsApp no permite adjuntarlo automáticamente; deberás enviarlo en la conversación.</p>
               {artwork ? <p className="font-technical mt-2 text-xs uppercase text-[var(--signal)]">Seleccionado localmente: {artwork.name}</p> : null}
             </div>
             <div className="flex gap-2">
-              <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--ink)] px-4 text-xs uppercase text-[var(--paper)]">
+              <label className="font-technical inline-flex min-h-11 cursor-pointer items-center bg-[var(--pp-navy)] px-4 text-xs uppercase text-white transition-colors hover:bg-[var(--pp-cyan)]">
                 <input type="file" className="sr-only" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" onChange={(event) => { resetOpeningAttempt(); setArtwork(event.target.files?.[0] ?? null); }} />
                 {artwork ? "Reemplazar archivo" : "Seleccionar archivo"}
               </label>
@@ -306,10 +306,10 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
       <QuoteSummary result={result} canSubmit={canSubmit} isOpening={isOpening} />
 
-      <section className="border-y border-[var(--line)] py-8 lg:col-start-1">
-        <div className="flex items-center gap-3 border-b border-[var(--line-soft)] pb-3">
-          <span className="font-technical text-xs text-[var(--signal)]">MÓDULO 03</span>
-          <h2 className="text-xl">Información para el mensaje</h2>
+      <section className="border-y border-[var(--pp-line)] py-8 lg:col-start-1">
+        <div className="flex items-baseline gap-3 border-b border-[var(--pp-line)] pb-3">
+          <span className="font-technical text-xs text-[var(--pp-cyan)]">03</span>
+          <h2 className="text-2xl">Información para el mensaje</h2>
         </div>
         <p className="mt-3 text-sm text-[var(--muted)]">Estos datos solo se incorporan al mensaje de WhatsApp. No se guardan ni se envían a un servidor propio.</p>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -323,7 +323,7 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 
       {formError ? <p role="alert" className="border border-[var(--color-error)]/25 bg-[var(--color-error-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-error)] lg:col-start-1">{formError}</p> : null}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--ink)] bg-[var(--stone-highest)] px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--pp-navy)] bg-[var(--pp-paper-cool)] px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 lg:hidden">
         <div className="mx-auto flex max-w-lg items-end justify-between gap-4">
           <div><p className="font-technical text-xs uppercase text-[var(--muted)]">{result?.status === "partial" ? "Total parcial" : result?.status === "requiresQuote" ? "Precio" : "Total estimado"}</p><p className="tabular-nums text-lg font-bold">{result?.estimatedTotalCop === null || result?.estimatedTotalCop === undefined ? "Por validar" : formatCOP(result.estimatedTotalCop)}</p></div>
           <Button type="submit" disabled={!canSubmit} variant="secondary" className="min-h-12 px-4">{isOpening ? "Solicitud preparada" : "Continuar en WhatsApp"}</Button>
@@ -339,19 +339,19 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
 function QuoteSummary({ result, canSubmit, isOpening }: { result: QuoteResult | null; canSubmit: boolean; isOpening: boolean }) {
   const presentation = result ? presentQuote(result) : null;
   return (
-    <section aria-label="Desglose de la solicitud" className="border border-[var(--ink)] bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:row-span-6 lg:block lg:self-start">
-      <h2 className="font-technical border-b border-[var(--line-soft)] pb-4 text-xs uppercase tracking-[.16em]">Resumen de solicitud</h2>
+    <section aria-label="Desglose de la solicitud" className="bg-[var(--pp-navy)] p-5 text-white lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:row-span-6 lg:block lg:self-start lg:p-6">
+      <h2 className="font-technical border-b border-white/20 pb-4 text-xs uppercase tracking-[.16em] text-[var(--pp-cyan-light)]">Resumen de solicitud</h2>
       {result ? (
         <>
           <p className="mt-5 text-sm font-semibold">{result.product.name}</p>
-          <p className="font-technical mt-1 text-xs uppercase text-[var(--muted)]">× {result.quantity.toLocaleString("es-CO")} unidades</p>
-          {result.selectedTier ? <p className="mt-2 text-xs text-[var(--blue-dark)]">Tramo aplicado: {result.selectedTier.minQuantity.toLocaleString("es-CO")}–{result.selectedTier.maxQuantity?.toLocaleString("es-CO") ?? "en adelante"} unidades.</p> : null}
-          <p className={`mt-5 border-y border-[var(--line-soft)] py-3 text-sm font-bold ${result.status === "partial" ? "text-[var(--signal)]" : ""}`}>{presentation?.heading}</p>
+          <p className="font-technical mt-1 text-xs uppercase text-[var(--pp-cyan-pale)]">× {result.quantity.toLocaleString("es-CO")} unidades</p>
+          {result.selectedTier ? <p className="mt-2 text-xs text-[var(--pp-cyan-pale)]">Tramo aplicado: {result.selectedTier.minQuantity.toLocaleString("es-CO")}–{result.selectedTier.maxQuantity?.toLocaleString("es-CO") ?? "en adelante"} unidades.</p> : null}
+          <p className={`mt-5 border-y border-white/20 py-3 text-sm font-bold ${result.status === "partial" ? "text-[var(--pp-cyan-light)]" : ""}`}>{presentation?.heading}</p>
           {presentation && presentation.lines.length > 0 ? (
             <dl className="mt-4 space-y-2 text-sm">
               {presentation.lines.map((line) => <SummaryLine key={line.id} label={line.label} value={line.value} />)}
               {presentation.totalLabel && presentation.totalValue ? (
-                <div className="mt-4 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-4">
+                <div className="mt-4 flex items-end justify-between gap-4 border-t border-white/30 pt-4">
                   <dt className="font-semibold">{presentation.totalLabel}</dt>
                   <dd className="text-right text-2xl font-bold">{presentation.totalValue}</dd>
                 </div>
@@ -359,21 +359,21 @@ function QuoteSummary({ result, canSubmit, isOpening }: { result: QuoteResult | 
             </dl>
           ) : <p className="mt-4 text-sm">No se muestra un total hasta validar los importes pendientes.</p>}
           {presentation && presentation.excludedCharges.length > 0 ? (
-            <div className="mt-5 border border-[var(--signal)]/30 bg-[var(--stone)] p-3 text-sm">
+            <div className="mt-5 border border-[var(--pp-cyan-light)] bg-[var(--pp-navy-700)] p-3 text-sm">
               <p className="font-bold">Cargos excluidos por validar</p>
               <ul className="mt-2 list-disc space-y-1 pl-5">{presentation.excludedCharges.map((charge) => <li key={charge}>{charge}</li>)}</ul>
             </div>
           ) : null}
         </>
-      ) : <p className="mt-5 text-sm text-[var(--muted)]">Corrige la configuración para ver el desglose.</p>}
-      <p className="font-technical mt-6 text-xs uppercase leading-5 text-[var(--muted)]">Solicitud estimada, no cotización formal. Los valores requieren validación comercial.</p>
+      ) : <p className="mt-5 text-sm text-[var(--pp-cyan-pale)]">Corrige la configuración para ver el desglose.</p>}
+      <p className="font-technical mt-6 text-xs uppercase leading-5 text-[var(--pp-cyan-pale)]">Solicitud estimada, no cotización formal. Los valores requieren validación comercial.</p>
       <Button type="submit" disabled={!canSubmit} variant="secondary" className="mt-5 min-h-14 w-full"><WhatsAppIcon className="h-4 w-4" /> {isOpening ? "Solicitud preparada" : "Continuar en WhatsApp"}</Button>
     </section>
   );
 }
 
 function SummaryLine({ label, value }: { label: string; value: string }) {
-  return <div className="flex justify-between gap-4 text-[var(--muted)]"><dt>{label}</dt><dd className="text-right font-semibold text-[var(--ink)]">{value}</dd></div>;
+  return <div className="flex justify-between gap-4 text-[var(--pp-cyan-pale)]"><dt>{label}</dt><dd className="text-right font-semibold text-white">{value}</dd></div>;
 }
 
 function ContactInput({ id, label, value, error, maxLength, type = "text", autoComplete, className = "", onChange, onBlur }: {

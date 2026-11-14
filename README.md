@@ -1,4 +1,12 @@
-# Tinta — catálogo y cotizador frontend
+<h1 align="center">Tinta</h1>
+
+<p align="center">Catálogo de productos promocionales con cotización orientativa en el navegador y contacto por WhatsApp.</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Proyecto-Next.js%20%C2%B7%20TypeScript-543461" alt="Next.js · TypeScript">
+</p>
+
+[Catálogo de recursos](public/products/)
 
 Landing comercial para explorar productos promocionales, configurar una cotización aproximada en el navegador y continuar la conversación con la empresa por WhatsApp.
 

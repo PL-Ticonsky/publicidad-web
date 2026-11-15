@@ -6,9 +6,8 @@ import type {
 /**
  * Explicit allow-list discovered from src/data/products.ts.
  *
- * The commercial templates deliberately remain absent: PRODUCT_SCOPE.md says
- * that the exact approved print areas and mockups are pending. A real template
- * must not be inferred from the monolithic catalogue illustrations.
+ * Commercial templates require approved mockups and print areas.
+ * Catalogue illustrations do not define a commercial template.
  */
 export const CUSTOMIZER_PRODUCT_SUPPORT = [
   {

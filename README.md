@@ -6,7 +6,7 @@ Una vitrina de productos promocionales para explorar formas de llavero, probar u
 ![TypeScript](https://img.shields.io/badge/TypeScript-Catálogo%20y%20cotizador-15627a?logo=typescript&logoColor=white)
 ![Vista previa local](https://img.shields.io/badge/Personalizador-Canvas%20local-15627a)
 
-[Vista previa](#vista-previa) · [Inicio local](#ejecutar-el-proyecto) · [Alcance técnico](docs/PRODUCT_SCOPE.md)
+[Vista previa](#vista-previa) · [Inicio local](#ejecutar-el-proyecto)
 
 ## Vista previa
 

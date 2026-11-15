@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
-  <title id="title">Termo metálico corporativo</title>
-  <rect width="800" height="600" fill="#e9e8e4"/>
-  <path d="M312 114h176l31 67-26 341c-3 39-31 60-93 60s-90-21-93-60l-26-341z" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
-  <rect x="299" y="76" width="202" height="66" rx="22" fill="#1b1c1a"/>
-  <path d="M308 244h184" stroke="#8f6f6c" stroke-width="5"/>
-  <circle cx="400" cy="362" r="64" fill="#af101a"/>
-  <path d="M367 362h66M400 329v66" stroke="#fff" stroke-width="9"/>
-</svg>

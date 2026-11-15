@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ProductQuoteCalculator } from "@/components/product-quote-calculator";
 import { EmptyState } from "@/components/ui/feedback";
+import { keychainShapes } from "@/data/keychain-shapes";
 import { getAllActiveProducts, getProductBySlug } from "@/data/products";
 
 export const metadata: Metadata = {
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
   description: "Configura una cotización aproximada en tu navegador y continúa la conversación por WhatsApp.",
 };
 
-export default async function QuotePage({ searchParams }: { searchParams: Promise<{ producto?: string | string[] }> }) {
-  const { producto } = await searchParams;
+export default async function QuotePage({ searchParams }: { searchParams: Promise<{ producto?: string | string[]; forma?: string | string[] }> }) {
+  const { producto, forma } = await searchParams;
   const selectedProduct = typeof producto === "string" ? getProductBySlug(producto) : undefined;
 
   if (!selectedProduct) {
@@ -35,13 +36,17 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
     );
   }
 
+  const requestedShape = selectedProduct.slug === "llavero-acrilico-personalizado" && typeof forma === "string"
+    ? keychainShapes.find((shape) => shape.id === forma)?.name ?? (forma === "troquel-a-medida" ? "Troquel a medida" : undefined)
+    : undefined;
+
   return (
     <main className="min-h-screen">
       <div className="page-container pb-[var(--pp-section-y)] pt-8 sm:pt-12">
         <Link href={`/producto/${selectedProduct.slug}`} className="font-technical inline-flex min-h-11 items-center text-xs uppercase text-[var(--pp-cyan)] hover:text-[var(--pp-cyan-700)]">
           ← Volver al producto
         </Link>
-        <section className="mt-3"><ProductQuoteCalculator product={selectedProduct} /></section>
+        <section className="mt-3"><ProductQuoteCalculator key={`${selectedProduct.slug}:${requestedShape ?? ""}`} product={selectedProduct} requestedShape={requestedShape} /></section>
       </div>
     </main>
   );

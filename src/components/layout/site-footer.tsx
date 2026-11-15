@@ -13,7 +13,7 @@ export function SiteFooter() {
         </div>
         <div>
           <h2 className="font-technical text-xs uppercase tracking-[var(--pp-tracking-label)]">Productos</h2>
-          <div className="mt-5 grid gap-3 text-sm text-[var(--pp-navy-700)]"><Link href="/catalogo">Ver catálogo</Link><Link href="/#categorias">Explorar categorías</Link></div>
+          <div className="mt-5 grid gap-3 text-sm text-[var(--pp-navy-700)]"><Link href="/catalogo">Ver catálogo</Link><Link href="/#catalogo">Explorar líneas</Link></div>
         </div>
         <div>
           <h2 className="font-technical text-xs uppercase tracking-[var(--pp-tracking-label)]">Información</h2>

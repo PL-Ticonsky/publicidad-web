@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
-  <title id="title">Tote bag personalizada</title>
-  <rect width="800" height="600" fill="#e9e8e4"/>
-  <path d="M220 180h360l42 344H178z" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
-  <path d="M310 202c0-93 35-134 90-134s90 41 90 134" fill="none" stroke="#1b1c1a" stroke-width="18"/>
-  <rect x="298" y="292" width="204" height="132" fill="#af101a"/>
-  <path d="M350 358h100M400 308v100" stroke="#fff" stroke-width="10"/>
-</svg>

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: { default: "Propagplast | Publicidad física personalizada", template: "%s | Propagplast" },
   description:
     "Cotiza productos promocionales personalizados por cantidad para empresas, eventos y campañas en Colombia.",
-  openGraph: { title: "Propagplast | Publicidad física personalizada", description: "Productos promocionales para empresas, eventos y campañas en Colombia.", type: "website", locale: "es_CO" },
+  openGraph: { title: "Propagplast | Publicidad física personalizada", description: "Canecas, manillas, llaveros, mousepads y portavasos promocionales para empresas, eventos y campañas en Colombia.", type: "website", locale: "es_CO" },
 };
 
 export default function RootLayout({

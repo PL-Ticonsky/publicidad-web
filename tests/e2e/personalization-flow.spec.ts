@@ -25,7 +25,7 @@ for (const product of [
   { slug: "llavero-metalico-redondo", name: "Llavero metálico redondo" },
   { slug: "llavero-acrilico-personalizado", name: "Llavero acrílico personalizado" },
   { slug: "llavero-destapador-corporativo", name: "Llavero destapador corporativo" },
-  { slug: "mouse-pad-personalizado-rectangular", name: "Mouse Pad personalizado rectangular" },
+  { slug: "mouse-pad-personalizado-rectangular", name: "Mousepad personalizado rectangular" },
 ]) {
   test(`${product.name} expone el acceso y continúa seguro sin PNG`, async ({ page }) => {
     await page.goto(`/producto/${product.slug}`);
@@ -52,17 +52,6 @@ for (const product of [
     expect(message).not.toContain("archivo PNG");
   });
 }
-
-test("un producto no compatible conserva un camino seguro al cotizador", async ({ page }) => {
-  const response = await page.goto("/producto/camiseta-corporativa-personalizada/personalizar");
-  expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { name: "Este producto no admite personalización visual" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Continuar al cotizador" })).toHaveAttribute(
-    "href",
-    "/cotizador?producto=camiseta-corporativa-personalizada",
-  );
-  await expect(page.getByText(/No se añadirá ninguna referencia a un PNG/)).toBeVisible();
-});
 
 for (const viewport of [
   { width: 320, height: 700 },

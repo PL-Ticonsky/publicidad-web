@@ -1,18 +1,34 @@
-# Tinta — catálogo y cotizador frontend
+# Propagplast · Catálogo y cotizador
 
-Landing comercial para explorar productos promocionales, configurar una cotización aproximada en el navegador y continuar la conversación con la empresa por WhatsApp.
+Una vitrina de productos promocionales para explorar formas de llavero, probar un logo sobre una referencia compatible y calcular una estimación por cantidad. El cliente puede continuar por WhatsApp con un resumen de su solicitud.
 
-La aplicación no usa base de datos, API propia, autenticación ni persistencia de clientes o cotizaciones. Todo el catálogo y todas las reglas de precio están versionados como archivos TypeScript.
+![Next.js](https://img.shields.io/badge/Next.js-App%20Router-10283d?logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-Catálogo%20y%20cotizador-15627a?logo=typescript&logoColor=white)
+![Vista previa local](https://img.shields.io/badge/Personalizador-Canvas%20local-15627a)
+
+[Vista previa](#vista-previa) · [Inicio local](#ejecutar-el-proyecto) · [Alcance técnico](docs/PRODUCT_SCOPE.md)
+
+## Vista previa
+
+<a href="docs/media/portada.jpg"><img src="docs/media/portada.jpg" width="700" alt="Portada de Propagplast con la entrada al catálogo y al cotizador"></a>
+
+### De la galería al cotizador
+
+El recorrido muestra cómo elegir una forma de llavero y llevarla a las observaciones de una estimación.
+
+<a href="docs/media/recorrido.gif"><img src="docs/media/recorrido.gif" width="620" alt="Demostración animada de la selección de una forma de llavero y su paso al cotizador"></a>
 
 ## Flujo
 
 ```text
-Landing → catálogo → detalle del producto → cotizador → WhatsApp
+Landing → catálogo → detalle → personalización opcional → estimación → WhatsApp
 ```
 
-- `/`: landing, categorías y productos destacados.
-- `/catalogo`: catálogo local con búsqueda, filtros y ordenamiento.
+- `/`: landing y selector de las cinco líneas Propagplast.
+- `/catalogo`: catálogo local con filtros por línea.
+- `/catalogo/[categorySlug]`: línea seleccionada y referencias aprobadas disponibles.
 - `/producto/[slug]`: ficha del producto, imágenes, técnicas y mínimos.
+- `/producto/[slug]/personalizar`: prueba de arte para referencias compatibles.
 - `/cotizador?producto=[slug]`: configuración y cálculo local.
 
 Los datos del formulario se utilizan exclusivamente para construir el mensaje. No se envían a un servidor ni se almacenan en el navegador.
@@ -22,7 +38,7 @@ Los datos del formulario se utilizan exclusivamente para construir el mensaje. N
 Requisitos: Node.js 20 o posterior y npm.
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
@@ -33,7 +49,8 @@ Para comprobar una versión de producción:
 
 ```bash
 npm run lint
-npx tsc --noEmit
+npm run typecheck
+npm test
 npm run build
 npm start
 ```
@@ -53,16 +70,18 @@ Usa el código del país y solo dígitos. Al generar el enlace, la aplicación t
 La información está separada por responsabilidad:
 
 - `src/data/products.ts`: productos, slugs, mínimos, imágenes y tramos de precio.
-- `src/data/categories.ts`: categorías.
+- `src/data/product-lines.ts`: fuente única de las cinco líneas, textos, SVG y enlaces.
+- `src/data/categories.ts`: categorías derivadas de las líneas.
 - `src/data/techniques.ts`: técnicas, preparación y precio por unidad.
 - `src/data/additionals.ts`: adicionales y forma de cobro.
 - `public/products/`: recursos visuales locales.
+- `public/lines/`: ilustraciones SVG de las cinco líneas.
 
-Las funciones `getAllActiveProducts`, `getFeaturedProducts`, `getProductBySlug` y `getProductsByCategory` evitan que la interfaz repita filtros sobre los arreglos.
+Las funciones `getAllActiveProducts`, `getProductBySlug` y `getProductsByCategory` evitan que la interfaz repita filtros sobre los arreglos.
 
 ### Agregar un producto
 
-1. Agrega su categoría en `categories.ts` si todavía no existe.
+1. Confirma que pertenece a una de las cinco líneas de `product-lines.ts`; no agregues líneas sin aprobación comercial.
 2. Agrega las técnicas y adicionales necesarios en sus respectivos archivos.
 3. Guarda sus imágenes en `public/products/`.
 4. Añade un objeto a `products.ts` con un `id` y `slug` únicos.

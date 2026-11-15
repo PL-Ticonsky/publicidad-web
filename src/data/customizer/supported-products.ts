@@ -28,7 +28,7 @@ export const CUSTOMIZER_PRODUCT_SUPPORT = [
   },
   {
     productSlug: "mouse-pad-personalizado-rectangular",
-    productName: "Mouse Pad personalizado rectangular",
+    productName: "Mousepad personalizado rectangular",
     templateStatus: "awaiting-approved-assets",
   },
 ] as const satisfies readonly CustomizerProductSupport[];

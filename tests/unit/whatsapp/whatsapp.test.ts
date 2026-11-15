@@ -21,19 +21,24 @@ describe("WhatsApp", () => {
   });
 
   it("usa exactamente la presentación del dominio y conserva semántica parcial", () => {
-    const result = calculateQuote({
-      product: productFixture("camiseta-corporativa-personalizada"),
+    const completeResult = calculateQuote({
+      product: productFixture("llavero-metalico-redondo"),
       quantity: 50,
-      techniqueId: "dtf-textil",
-      additionalIds: ["diseno-basico-camiseta", "entrega-urgente-camiseta"],
+      techniqueId: "laser-llavero",
+      additionalIds: ["empaque-llavero"],
     });
+    const result = {
+      ...completeResult,
+      status: "partial" as const,
+      excludedCharges: [{ id: "cargo-pendiente", name: "Cargo por validar", reason: "requiresQuote" as const }],
+    };
     const presentation = presentQuote(result);
     const message = buildWhatsAppMessage({ contact: validContact, result });
 
     expect(message).toContain("ESTIMACIÓN PARCIAL");
     for (const line of presentation.lines) expect(message).toContain(`${line.label}: ${line.value}`);
     expect(message).toContain(`${presentation.totalLabel}: ${presentation.totalValue}`);
-    expect(message).toContain("Cargos excluidos por validar: Entrega urgente");
+    expect(message).toContain("Cargos excluidos por validar: Cargo por validar");
     expect(message).toContain("no una cotización formal");
   });
 

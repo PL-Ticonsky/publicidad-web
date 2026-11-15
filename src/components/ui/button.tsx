@@ -4,11 +4,11 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "whatsapp";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "border border-[var(--pp-cyan)] bg-[var(--pp-cyan)] text-white hover:border-[var(--pp-cyan-600)] hover:bg-[var(--pp-cyan-600)] active:bg-[var(--pp-cyan-700)]",
-  secondary: "border border-[var(--pp-cyan)] bg-[var(--pp-cyan)] text-white hover:border-[var(--pp-cyan-600)] hover:bg-[var(--pp-cyan-600)] active:bg-[var(--pp-cyan-700)]",
+  primary: "border border-[var(--pp-cyan)] bg-[var(--pp-cyan)] !text-white hover:border-[var(--pp-cyan-600)] hover:bg-[var(--pp-cyan-600)] active:bg-[var(--pp-cyan-700)]",
+  secondary: "border border-[var(--pp-cyan)] bg-[var(--pp-cyan)] !text-white hover:border-[var(--pp-cyan-600)] hover:bg-[var(--pp-cyan-600)] active:bg-[var(--pp-cyan-700)]",
   outline: "border border-[var(--pp-navy)] bg-transparent text-[var(--pp-navy)] hover:bg-[var(--pp-paper-cool)] hover:text-[var(--pp-cyan-700)]",
   ghost: "border border-transparent bg-transparent text-[var(--pp-cyan)] hover:text-[var(--pp-cyan-700)]",
-  whatsapp: "border border-[var(--pp-success)] bg-[var(--pp-success)] text-white hover:bg-[#175c3a]",
+  whatsapp: "border border-[var(--pp-success)] bg-[var(--pp-success)] !text-white hover:bg-[#175c3a]",
 };
 
 export function buttonClass(variant: ButtonVariant = "primary", className = "") {

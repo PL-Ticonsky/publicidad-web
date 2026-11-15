@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Llavero corporativo</title>
+  <desc id="desc">Ilustración editorial geométrica de un llavero con aro y pieza personalizable.</desc>
+  <rect width="640" height="480" fill="#f2f6f9"/>
+  <circle cx="320" cy="112" r="68" fill="#fff" stroke="#0a303e" stroke-width="8"/>
+  <circle cx="320" cy="112" r="38" fill="#f2f6f9" stroke="#0a303e" stroke-width="8"/>
+  <path d="M320 180v52" fill="none" stroke="#0a303e" stroke-width="8"/>
+  <path d="m320 215 132 76-50 143H238l-50-143z" fill="#fff" stroke="#0a303e" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="320" cy="330" r="48" fill="#0088b0"/>
+  <path d="M294 330h52" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M116 386h50M474 386h50" fill="none" stroke="#0088b0" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -37,7 +37,7 @@ const initialContact: QuoteContact = {
   designNotes: "",
 };
 
-export function ProductQuoteCalculator({ product }: { product: Product }) {
+export function ProductQuoteCalculator({ product, requestedShape }: { product: Product; requestedShape?: string }) {
   const { preview, downloaded, downloadPreviewOnce } = useCustomizerPreview();
   const customizerPreview = preview?.productSlug === product.slug ? preview : null;
   const techniques = useMemo(() => getTechniquesByIds(product.availableTechniqueIds), [product.availableTechniqueIds]);
@@ -46,7 +46,10 @@ export function ProductQuoteCalculator({ product }: { product: Product }) {
   const [quantityInput, setQuantityInput] = useState(String(product.minimumQuantity));
   const [techniqueId, setTechniqueId] = useState(defaultTechnique?.id ?? "");
   const [additionalIds, setAdditionalIds] = useState<string[]>([]);
-  const [contact, setContact] = useState<QuoteContact>(initialContact);
+  const [contact, setContact] = useState<QuoteContact>(() => ({
+    ...initialContact,
+    designNotes: requestedShape ? `Forma solicitada: ${requestedShape}` : "",
+  }));
   const [fieldErrors, setFieldErrors] = useState<ContactErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [artwork, setArtwork] = useState<File | null>(null);

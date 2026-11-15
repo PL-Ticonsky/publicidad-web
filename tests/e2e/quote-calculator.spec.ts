@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-const quotePath = "/cotizador?producto=camiseta-corporativa-personalizada";
+const quotePath = "/cotizador?producto=llavero-metalico-redondo";
 const viewports = [
   { width: 320, height: 700 },
   { width: 390, height: 844 },

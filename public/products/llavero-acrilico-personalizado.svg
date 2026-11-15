@@ -4,6 +4,6 @@
   <circle cx="400" cy="128" r="76" fill="none" stroke="#1b1c1a" stroke-width="16"/>
   <path d="M400 202v66" stroke="#1b1c1a" stroke-width="16"/>
   <path d="m400 246 166 96-64 184H298l-64-184z" fill="#faf9f5" fill-opacity=".82" stroke="#1b1c1a" stroke-width="8"/>
-  <circle cx="400" cy="396" r="63" fill="#af101a"/>
+  <circle cx="400" cy="396" r="63" fill="#0088b0"/>
   <path d="M366 396h68" stroke="#fff" stroke-width="10"/>
 </svg>

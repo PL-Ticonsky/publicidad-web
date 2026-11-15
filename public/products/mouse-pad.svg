@@ -3,7 +3,7 @@
   <rect width="800" height="600" fill="#efeeea"/>
   <rect x="120" y="105" width="560" height="390" rx="30" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
   <path d="M120 410 325 240l115 100 96-90 144 125v90c0 17-13 30-30 30H150c-17 0-30-13-30-30z" fill="#d9d3cc"/>
-  <circle cx="252" cy="210" r="45" fill="#af101a"/>
+  <circle cx="252" cy="210" r="45" fill="#0088b0"/>
   <path d="m330 372 70-116 70 116z" fill="#1b1c1a"/>
   <text x="400" y="455" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="#1b1c1a">TU CAMPAÑA</text>
 </svg>

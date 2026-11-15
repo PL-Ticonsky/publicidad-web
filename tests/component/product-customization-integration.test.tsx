@@ -189,11 +189,11 @@ describe("integración del personalizador", () => {
   });
 
   it("no mezcla una previsualización con otro producto", async () => {
-    const camiseta = productFixture("camiseta-corporativa-personalizada");
+    const unsupportedProduct = productFixture("llavero-destapador-corporativo");
     render(
       <CustomizerPreviewProvider>
         <SeedPreview preview={readyPreview()} />
-        <ProductQuoteCalculator product={camiseta} />
+        <ProductQuoteCalculator product={unsupportedProduct} />
       </CustomizerPreviewProvider>,
     );
     await waitFor(() => expect(screen.queryByLabelText("Previsualización personalizada")).not.toBeInTheDocument());

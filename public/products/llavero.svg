@@ -2,8 +2,8 @@
   <title id="title">Llavero metálico redondo</title>
   <rect width="800" height="600" fill="#e9e8e4"/>
   <circle cx="400" cy="345" r="148" fill="#faf9f5" stroke="#1b1c1a" stroke-width="9"/>
-  <circle cx="400" cy="345" r="112" fill="none" stroke="#8f6f6c" stroke-width="3"/>
+  <circle cx="400" cy="345" r="112" fill="none" stroke="#0088b0" stroke-width="3"/>
   <path d="M400 196c-25-68 3-130 68-140 56-8 105 32 105 87 0 43-35 78-78 78-30 0-56-17-69-42" fill="none" stroke="#1b1c1a" stroke-width="18"/>
-  <path d="M365 324h70M400 289v70" stroke="#af101a" stroke-width="9"/>
+  <path d="M365 324h70M400 289v70" stroke="#0088b0" stroke-width="9"/>
   <text x="400" y="415" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" letter-spacing="5" fill="#1b1c1a">TU MARCA</text>
 </svg>

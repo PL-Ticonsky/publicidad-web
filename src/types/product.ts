@@ -56,6 +56,5 @@ export interface Product {
   priceTiers: PriceTier[];
   availableTechniqueIds: string[];
   availableAdditionalIds: string[];
-  featured?: boolean;
   active: boolean;
 }

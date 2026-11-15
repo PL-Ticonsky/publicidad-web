@@ -6,34 +6,34 @@ import { productFixture } from "../../fixtures/quotation";
 describe("calculateQuote", () => {
   it("calcula mínimo, técnica por unidad, preparación, IVA y total en COP enteros", () => {
     const result = calculateQuote({
-      product: productFixture("camiseta-corporativa-personalizada"),
-      quantity: 20,
-      techniqueId: "dtf-textil",
+      product: productFixture("llavero-metalico-redondo"),
+      quantity: 50,
+      techniqueId: "laser-llavero",
       additionalIds: [],
     });
 
     expect(result).toMatchObject({
       status: "complete",
-      baseUnitPriceCop: 32_000,
-      baseSubtotalCop: 640_000,
-      techniqueCostCop: 115_000,
+      baseUnitPriceCop: 6_500,
+      baseSubtotalCop: 325_000,
+      techniqueCostCop: 55_000,
       additionalsCostCop: 0,
-      subtotalCop: 755_000,
-      taxAmountCop: 143_450,
-      estimatedTotalCop: 898_450,
+      subtotalCop: 380_000,
+      taxAmountCop: 72_200,
+      estimatedTotalCop: 452_200,
     });
   });
 
   it.each([
-    [49, "camiseta-20", 32_000],
-    [50, "camiseta-50", 28_500],
-    [99, "camiseta-50", 28_500],
-    [100, "camiseta-100", 25_000],
+    [99, "llavero-50", 6_500],
+    [100, "llavero-100", 5_200],
+    [299, "llavero-100", 5_200],
+    [300, "llavero-300", 4_500],
   ])("aplica el tramo correcto para %i unidades", (quantity, tierId, unitPrice) => {
     const result = calculateQuote({
-      product: productFixture("camiseta-corporativa-personalizada"),
+      product: productFixture("llavero-metalico-redondo"),
       quantity,
-      techniqueId: "dtf-textil",
+      techniqueId: "laser-llavero",
       additionalIds: [],
     });
     expect(result.selectedTier?.id).toBe(tierId);
@@ -57,43 +57,28 @@ describe("calculateQuote", () => {
     });
   });
 
-  it("excluye explícitamente un cargo requiresQuote y marca el total como parcial", () => {
-    const result = calculateQuote({
-      product: productFixture("camiseta-corporativa-personalizada"),
-      quantity: 50,
-      techniqueId: "dtf-textil",
-      additionalIds: ["diseno-basico-camiseta", "entrega-urgente-camiseta"],
-    });
-    expect(result).toMatchObject({
-      status: "partial",
-      additionalsCostCop: 30_000,
-      subtotalCop: 1_705_000,
-      taxAmountCop: 323_950,
-      estimatedTotalCop: 2_028_950,
-    });
-    expect(result.excludedCharges).toEqual([
-      expect.objectContaining({ id: "entrega-urgente-camiseta", name: "Entrega urgente" }),
-    ]);
-  });
-
   it("redondea el IVA una vez al COP más cercano", () => {
+    const source = productFixture("llavero-metalico-redondo");
     const result = calculateQuote({
-      product: productFixture("libreta-corporativa-personalizada"),
-      quantity: 25,
-      techniqueId: "tampografia-boligrafo",
+      product: {
+        ...source,
+        priceTiers: [{ id: "test-redondeo", minQuantity: 50, unitPrice: 6_501 }],
+      },
+      quantity: 50,
+      techniqueId: "laser-llavero",
       additionalIds: [],
     });
-    expect(result.subtotalCop).toBe(581_250);
-    expect(result.taxAmountCop).toBe(110_438);
-    expect(result.estimatedTotalCop).toBe(691_688);
+    expect(result.subtotalCop).toBe(380_050);
+    expect(result.taxAmountCop).toBe(72_210);
+    expect(result.estimatedTotalCop).toBe(452_260);
   });
 
   it("devuelve requiresQuote sin total para un producto quote-only", () => {
-    const source = productFixture("camiseta-corporativa-personalizada");
+    const source = productFixture("llavero-metalico-redondo");
     const result = calculateQuote({
       product: { ...source, pricingType: "quote-only", priceTiers: [] },
-      quantity: 20,
-      techniqueId: "dtf-textil",
+      quantity: 50,
+      techniqueId: "laser-llavero",
       additionalIds: [],
     });
     expect(result.status).toBe("requiresQuote");
@@ -102,11 +87,11 @@ describe("calculateQuote", () => {
   });
 
   it("rechaza fixed porque el modelo no tiene una regla comercial aprobada", () => {
-    const source = productFixture("camiseta-corporativa-personalizada");
+    const source = productFixture("llavero-metalico-redondo");
     expect(() => calculateQuote({
       product: { ...source, pricingType: "fixed" },
-      quantity: 20,
-      techniqueId: "dtf-textil",
+      quantity: 50,
+      techniqueId: "laser-llavero",
       additionalIds: [],
     })).toThrow(QuoteValidationError);
   });

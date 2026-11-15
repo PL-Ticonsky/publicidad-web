@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { validateQuotation, MAX_QUOTE_QUANTITY } from "@/lib/quotation/validate-quotation";
 import { productFixture } from "../../fixtures/quotation";
 
-const product = productFixture("camiseta-corporativa-personalizada");
+const product = productFixture("llavero-metalico-redondo");
 
 function errorsFor(quantity: number): string[] {
-  return validateQuotation({ product, quantity, techniqueId: "dtf-textil", additionalIds: [] });
+  return validateQuotation({ product, quantity, techniqueId: "laser-llavero", additionalIds: [] });
 }
 
 describe("validateQuotation", () => {
@@ -15,12 +15,12 @@ describe("validateQuotation", () => {
   });
 
   it("rechaza una cantidad positiva inferior al mínimo", () => {
-    expect(errorsFor(19)).toContain("La cantidad mínima es de 20 unidades.");
+    expect(errorsFor(49)).toContain("La cantidad mínima es de 50 unidades.");
   });
 
   it("acepta mínimo, frontera de tramo y máximo temporal", () => {
-    expect(errorsFor(20)).toEqual([]);
     expect(errorsFor(50)).toEqual([]);
+    expect(errorsFor(100)).toEqual([]);
     expect(errorsFor(MAX_QUOTE_QUANTITY)).toEqual([]);
   });
 
@@ -29,8 +29,8 @@ describe("validateQuotation", () => {
   });
 
   it("rechaza selecciones ajenas o duplicadas", () => {
-    expect(validateQuotation({ product, quantity: 20, techniqueId: "laser-usb", additionalIds: [] })).toContain("La técnica seleccionada no está disponible para este producto.");
-    expect(validateQuotation({ product, quantity: 20, techniqueId: "dtf-textil", additionalIds: ["caja-usb"] })).toContain("Uno de los adicionales seleccionados no está disponible para este producto.");
-    expect(validateQuotation({ product, quantity: 20, techniqueId: "dtf-textil", additionalIds: ["diseno-basico-camiseta", "diseno-basico-camiseta"] })).toContain("No se puede seleccionar el mismo adicional más de una vez.");
+    expect(validateQuotation({ product, quantity: 50, techniqueId: "sublimacion-mouse-pad", additionalIds: [] })).toContain("La técnica seleccionada no está disponible para este producto.");
+    expect(validateQuotation({ product, quantity: 50, techniqueId: "laser-llavero", additionalIds: ["empaque-mouse-pad"] })).toContain("Uno de los adicionales seleccionados no está disponible para este producto.");
+    expect(validateQuotation({ product, quantity: 50, techniqueId: "laser-llavero", additionalIds: ["empaque-llavero", "empaque-llavero"] })).toContain("No se puede seleccionar el mismo adicional más de una vez.");
   });
 });

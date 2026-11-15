@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Portavasos promocional</title>
+  <desc id="desc">Ilustración editorial geométrica de un portavasos circular visto en perspectiva.</desc>
+  <rect width="640" height="480" fill="#f2f6f9"/>
+  <path d="M120 250c0-78 90-140 200-140s200 62 200 140v54c0 78-90 140-200 140s-200-62-200-140z" fill="#0088b0" stroke="#0a303e" stroke-width="8"/>
+  <ellipse cx="320" cy="250" rx="200" ry="140" fill="#fff" stroke="#0a303e" stroke-width="8"/>
+  <ellipse cx="320" cy="250" rx="132" ry="82" fill="#e9f8ff" stroke="#0088b0" stroke-width="8"/>
+  <path d="M280 250h80M320 210v80" fill="none" stroke="#0a303e" stroke-width="8" stroke-linecap="round"/>
+  <path d="M102 394h54M484 394h54" fill="none" stroke="#0088b0" stroke-width="8" stroke-linecap="round"/>
+</svg>

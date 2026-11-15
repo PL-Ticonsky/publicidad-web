@@ -12,7 +12,7 @@ vi.mock("@/components/product-image", () => ({
   ProductImage: ({ alt }: { alt: string }) => <div role="img" aria-label={alt} />,
 }));
 
-const product = productFixture("camiseta-corporativa-personalizada");
+const product = productFixture("mouse-pad-personalizado-rectangular");
 
 async function completeRequiredFields() {
   const user = userEvent.setup();
@@ -85,35 +85,31 @@ describe("ProductQuoteCalculator", () => {
     expect(screen.getAllByRole("button", { name: "Solicitud preparada" })).not.toHaveLength(0);
   });
 
-  it("la UI y el mensaje interceptado usan la misma estimación parcial", async () => {
+  it("la UI y el mensaje interceptado usan la misma estimación completa", async () => {
     renderCalculator();
     const user = await completeRequiredFields();
     await user.click(screen.getByRole("checkbox", { name: /Diseño básico/ }));
-    await user.click(screen.getByRole("checkbox", { name: /Entrega urgente/ }));
+    await user.click(screen.getByRole("checkbox", { name: /Empaque individual/ }));
     await user.clear(screen.getByLabelText("Cantidad"));
     await user.type(screen.getByLabelText("Cantidad"), "50");
 
     const expected = presentQuote(calculateQuote({
       product,
       quantity: 50,
-      techniqueId: "dtf-textil",
-      additionalIds: ["diseno-basico-camiseta", "entrega-urgente-camiseta"],
+      techniqueId: "sublimacion-mouse-pad",
+      additionalIds: ["diseno-basico-mouse-pad", "empaque-mouse-pad"],
     }));
     const summary = screen.getByRole("region", { name: "Desglose de la solicitud" });
-    expect(summary).toHaveTextContent("Estimación parcial");
+    expect(summary).toHaveTextContent("Total estimado");
     for (const line of expected.lines) {
       expect(summary).toHaveTextContent(line.label);
       expect(summary).toHaveTextContent(line.value.replace(/\u00a0/g, " "));
     }
-    expect(summary).toHaveTextContent("Cargos excluidos por validar");
-    expect(summary).toHaveTextContent("Entrega urgente");
-
     const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
     fireEvent.submit(summary.closest("form") as HTMLFormElement);
     const openedUrl = new URL(String(open.mock.calls[0]?.[0]));
     const message = openedUrl.searchParams.get("text") ?? "";
     for (const line of expected.lines) expect(message).toContain(`${line.label}: ${line.value}`);
     expect(message).toContain(`${expected.totalLabel}: ${expected.totalValue}`);
-    expect(message).toContain("Cargos excluidos por validar: Entrega urgente");
   });
 });

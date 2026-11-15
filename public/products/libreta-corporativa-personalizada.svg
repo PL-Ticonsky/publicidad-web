@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
-  <title id="title">Libreta corporativa personalizada</title>
-  <rect width="800" height="600" fill="#efeeea"/>
-  <rect x="218" y="74" width="364" height="462" rx="18" fill="#faf9f5" stroke="#1b1c1a" stroke-width="8"/>
-  <path d="M284 76v458" stroke="#af101a" stroke-width="12"/>
-  <path d="M244 132h80M244 202h80M244 272h80M244 342h80M244 412h80M244 482h80" stroke="#1b1c1a" stroke-width="8"/>
-  <rect x="350" y="242" width="156" height="118" fill="#af101a"/>
-  <path d="M383 301h90" stroke="#fff" stroke-width="9"/>
-</svg>

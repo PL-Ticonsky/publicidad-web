@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { additionals } from "@/data/additionals";
 import { categories } from "@/data/categories";
+import { productLines } from "@/data/product-lines";
 import { products } from "@/data/products";
 import { techniques } from "@/data/techniques";
 import { calculateQuote } from "@/lib/quotation/calculate-quote";
@@ -33,6 +34,8 @@ export function assertCatalogIntegrity(): void {
   const duplicateProductSlugs = duplicateValues(products.map((product) => product.slug));
   const duplicateTechniqueIds = duplicateValues(techniques.map((technique) => technique.id));
   const duplicateAdditionalIds = duplicateValues(additionals.map((additional) => additional.id));
+  const duplicateLineIds = duplicateValues(productLines.map((line) => line.id));
+  const duplicateLineSlugs = duplicateValues(productLines.map((line) => line.slug));
 
   if (duplicateCategoryIds.length) errors.push(`IDs de categoría duplicados: ${duplicateCategoryIds.join(", ")}`);
   if (duplicateCategorySlugs.length) errors.push(`Slugs de categoría duplicados: ${duplicateCategorySlugs.join(", ")}`);
@@ -40,6 +43,25 @@ export function assertCatalogIntegrity(): void {
   if (duplicateProductSlugs.length) errors.push(`Slugs de producto duplicados: ${duplicateProductSlugs.join(", ")}`);
   if (duplicateTechniqueIds.length) errors.push(`IDs de técnica duplicados: ${duplicateTechniqueIds.join(", ")}`);
   if (duplicateAdditionalIds.length) errors.push(`IDs de adicional duplicados: ${duplicateAdditionalIds.join(", ")}`);
+  if (duplicateLineIds.length) errors.push(`IDs de línea duplicados: ${duplicateLineIds.join(", ")}`);
+  if (duplicateLineSlugs.length) errors.push(`Slugs de línea duplicados: ${duplicateLineSlugs.join(", ")}`);
+
+  productLines.forEach((line) => {
+    const relativePath = line.illustrationSrc.replace(/^\/+/, "");
+    if (!line.illustrationSrc.startsWith("/") || !existsSync(join(process.cwd(), "public", relativePath))) {
+      errors.push(`${line.slug}: ilustración local inexistente (${line.illustrationSrc}).`);
+    }
+    if (line.href !== `/catalogo/${line.slug}`) {
+      errors.push(`${line.slug}: href de catálogo inconsistente (${line.href}).`);
+    }
+    const productsInLine = products.filter((product) => product.categoryId === line.id && product.active);
+    if (line.commercialDataStatus === "available" && productsInLine.length === 0) {
+      errors.push(`${line.slug}: la línea está marcada como disponible pero no tiene referencias aprobadas.`);
+    }
+    if (line.commercialDataStatus === "pending" && productsInLine.length > 0) {
+      errors.push(`${line.slug}: la línea está pendiente pero contiene referencias activas.`);
+    }
+  });
 
   additionals.forEach((additional) => {
     if (additional.pricingStatus === "priced" && (!Number.isSafeInteger(additional.priceCop) || additional.priceCop <= 0)) {

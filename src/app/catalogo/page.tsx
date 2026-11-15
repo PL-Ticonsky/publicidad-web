@@ -5,8 +5,8 @@ import { EmptyState } from "@/components/ui/feedback";
 import { getAllActiveProducts } from "@/data/products";
 
 export const metadata: Metadata = {
-  title: "Catálogo de productos | Promocionales para empresas",
-  description: "Explora productos promocionales y soluciones de publicidad física para tu empresa.",
+  title: "Catálogo | Cinco líneas promocionales",
+  description: "Explora las líneas Propagplast: canecas, manillas, llaveros, mousepads y portavasos.",
 };
 
 export default function CatalogoPage() {
@@ -16,7 +16,7 @@ export default function CatalogoPage() {
       <header className="page-container pb-8 pt-10 sm:pb-12 sm:pt-16">
         <div className="flex flex-wrap items-end justify-between gap-7">
           <div><p className="eyebrow">Catálogo corporativo</p><h1 className="mt-4 [font-size:var(--pp-display-1)]">Catálogo<br /><span className="text-[var(--pp-cyan)]">Propagplast</span></h1></div>
-          <p className="max-w-[34ch] text-base italic leading-7 text-[var(--pp-navy-700)]">Productos promocionales reales, con cantidades mínimas y valores base según el catálogo vigente.</p>
+          <p className="max-w-[34ch] text-base italic leading-7 text-[var(--pp-navy-700)]">Cinco líneas promocionales y únicamente las referencias comerciales que ya cuentan con datos aprobados.</p>
         </div>
         <div className="mt-9"><CatalogNavigation /></div>
       </header>

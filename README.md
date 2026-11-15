@@ -33,6 +33,18 @@ Landing → catálogo → detalle → personalización opcional → estimación 
 
 Los datos del formulario se utilizan exclusivamente para construir el mensaje. No se envían a un servidor ni se almacenan en el navegador.
 
+## Del catálogo a la solicitud
+
+La estimación y la prueba de arte se procesan en el navegador. Si el cliente descarga el PNG, puede adjuntarlo manualmente en WhatsApp.
+
+```mermaid
+flowchart LR
+    A["Catálogo · eliges una referencia"] --> B["Cotizador · cantidad y acabados"]
+    P["Personalizador · prueba de arte opcional"] --> B
+    B --> C["Desglose de la estimación"]
+    C --> D["WhatsApp · mensaje preparado"]
+```
+
 ## Ejecutar el proyecto
 
 Requisitos: Node.js 20 o posterior y npm.
